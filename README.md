@@ -8,22 +8,35 @@ http://www.fit.vutbr.cz/study/courses/IFJ/public/project/
 Tasks:
  Knuth-Morris-Pratt algorithm: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
   - used to find substring in string in function ifj16.find
+  
  Shell sort: https://en.wikipedia.org/wiki/Shellsort
   - used for sorting (duh) in function ifj16.sort
+  
  Hashing table: https://en.wikipedia.org/wiki/Hash_table
   - used as "symbol table"
+  
 
 Error codes:
  1 - chyba v programu v rámci lexikální analýzy (chybná struktura aktuálního lexému).
+ 
  2 - chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu).
+ 
  3 - sémantická chyba v programu – nedefinovaná trída/funkce/promenná, pokus o redefinici trídy/funkce/promenné, atd.
+ 
  4 - sémantická chyba typové kompatibility v aritmetických, retezcových a relacních výrazech, príp. špatný pocet ci typ parametru u volání funkce.
+ 
  6 - ostatní sémantické chyby.
+ 
  7 - behová chyba pri nacítání císelné hodnoty ze vstupu.
+ 
  8 - behová chyba pri práci s neinicializovanou promennou.
+ 
  9 - behová chyba delení nulou.
+ 
  10 - ostatní behové chyby.
+ 
  99 - interní chyba interpretu tj. neovlivnená vstupním programem (napr. chyba alokace pameti, chyba pri otvírání souboru s rídicím programem, špatné parametry príkazové rádky atd.)
+ 
  
 Properties of programming language IFJ16:
  - case sensitive
