@@ -9,10 +9,10 @@ Tasks:
  Knuth-Morris-Pratt algorithm: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
   - used to find substring in string in function ifj16.find
   
- Shell sort: https://en.wikipedia.org/wiki/Shellsort
+Shell sort: https://en.wikipedia.org/wiki/Shellsort
   - used for sorting (duh) in function ifj16.sort
   
- Hashing table: https://en.wikipedia.org/wiki/Hash_table
+Hashing table: https://en.wikipedia.org/wiki/Hash_table
   - used as "symbol table"
   
 
@@ -42,7 +42,7 @@ Properties of programming language IFJ16:
  - case sensitive
  - entry point of every program is compulsory class Main and it's function run
  - reserved keywords: boolean, break, class, continue, do, double, else, false, for, if, int, return, String, static, true, void, while
-
+ 
  Operators priority table:
   Priority   Operator
      3         * /
