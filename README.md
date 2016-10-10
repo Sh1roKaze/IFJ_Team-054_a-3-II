@@ -46,16 +46,16 @@ Properties of programming language IFJ16:
  - reserved keywords: boolean, break, class, continue, do, double, else, false, for, if, int, return, String, static, true, void, while
  
 Operators priority table:
+______________________
+| Priority |  Operator |
 
-|Priority |  Operator
+| 3        | * /       |
 
-|3        | * /
+| 4        | + -       |
 
-|4        | + -
+| 6        | < > <= >= |
 
-|6        | < > <= >=
-
-|7        | == !=
+| 7        | == !=     |
 
 
 Built-in functions: 
