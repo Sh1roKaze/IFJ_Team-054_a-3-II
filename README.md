@@ -6,6 +6,7 @@ Podpůrné materiály:
 http://www.fit.vutbr.cz/study/courses/IFJ/public/project/
 
 Tasks:
+
  Knuth-Morris-Pratt algorithm: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
   - used to find substring in string in function ifj16.find
   
@@ -51,12 +52,21 @@ Properties of programming language IFJ16:
      7         == !=
  
  Built-in functions:
+ 
   int ReadInt();
+ 
   double ReadDouble();
+
   String ReadString();
+  
   void print(text);
+
   int length(String s);
+
   String substr(String s, int i, int n);
+  
   int compare(String s1, String s2);
+  
   int find(String s, String search);
+  
   String sort(String s);
