@@ -44,29 +44,26 @@ Properties of programming language IFJ16:
  - entry point of every program is compulsory class Main and it's function run
  - reserved keywords: boolean, break, class, continue, do, double, else, false, for, if, int, return, String, static, true, void, while
  
- Operators priority table:
+Operators priority table:
+
   Priority   Operator
-     3         * /
-     4         + -
-     6         < > <= >=
-     7         == !=
- 
- Built-in functions:
- 
-  int ReadInt();
- 
-  double ReadDouble();
 
-  String ReadString();
-  
-  void print(text);
+3         * /
 
-  int length(String s);
+4         + -
 
-  String substr(String s, int i, int n);
-  
-  int compare(String s1, String s2);
-  
-  int find(String s, String search);
-  
-  String sort(String s);
+6         < > <= >=
+
+7         == !=
+
+
+Built-in functions: 
+ - int ReadInt();
+ - double ReadDouble();
+ - String ReadString();
+ - void print(text);
+ - int length(String s);
+ - String substr(String s, int i, int n);
+ - int compare(String s1, String s2);
+ - int find(String s, String search);
+ - String sort(String s);
