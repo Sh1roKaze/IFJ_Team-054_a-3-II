@@ -18,6 +18,7 @@ Hashing table: https://en.wikipedia.org/wiki/Hash_table
   
 
 Error codes:
+
  1 - chyba v programu v rámci lexikální analýzy (chybná struktura aktuálního lexému).
  
  2 - chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu).
@@ -46,15 +47,15 @@ Properties of programming language IFJ16:
  
 Operators priority table:
 
-  Priority   Operator
+|Priority |  Operator
 
-3         * /
+|3        | * /
 
-4         + -
+|4        | + -
 
-6         < > <= >=
+|6        | < > <= >=
 
-7         == !=
+|7        | == !=
 
 
 Built-in functions: 
