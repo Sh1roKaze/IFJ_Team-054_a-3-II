@@ -4,6 +4,7 @@ https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj20
 
 Podpůrné materiály:
 http://www.fit.vutbr.cz/study/courses/IFJ/public/project/
+https://www.algoritmy.net/article/100/Konstrukce-prekladace
 
 ______________________
 
