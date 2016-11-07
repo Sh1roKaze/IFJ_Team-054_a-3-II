@@ -1,0 +1,58 @@
+ 0: <file> -> <program>
+ 1: <file> -> <class>
+ 2: <file> -> $
+ 3: <program> -> <class "Main"> <function "run">
+ 4: <class> -> class <id> {
+ 5: <class> -> <function>
+ 6: <class> -> <staticvar>
+ 7: <class> -> }
+ 8: <function> -> static <declaration> ( <arg-list> ) { <st-list> }
+ 9: <arg-list> -> <arg>
+10: <arg-list> -> <arg> ,  <arg-list>
+11: <arg-list> -> $
+12: <arg> -> <expression>
+13: <arg> -> <declaration>
+14: <st-list> -> <statement> ; <st-list>
+15: <st-list> -> <localvar>
+16: <statement> -> <assignment>
+16: <statement> -> <block>
+17: <statement> -> <condition>
+18: <statement> -> <cycle>
+19: <statement> -> <call>
+20: <statement> -> <return>
+21: <assignment> -> <id> = <expression>;
+22: <block> -> {
+23: <block> -> <statement> <block>
+24: <block> -> }
+25: <condition> -> if ( <comparison> ) <block> else <block>
+26: <cycle> -> while ( <comparison> ) <block>
+27: <call> -> <id> = <id>( <arg-list> ) ;
+28: <call> -> <id>( <arg-list> ) ;
+29: <return> -> return <expression> ;
+30: <expression> -> <term> + <expression>
+31: <expression> -> <term> - <expression>
+32: <expression> -> <term>
+33: <term> -> <factor> * <term>
+34: <term> -> <factor> / <term>
+35: <term> -> <factor>
+36: <factor> -> <literal>
+37: <factor> -> <id>
+38: <literal> -> <string>
+39: <literal> -> <number>
+40: <staticvar> -> static <declaration>
+41: <staticvar> -> static <declaration> = <expression> ;
+42: <localvar> -> <declaration>
+43: <localvar> -> <declaration> = <expression> ;
+44: <declaration> -> <type> <id>
+45: <type> -> int
+46: <type> -> string
+47: <type> -> double
+48: <id> -> class.id
+49: <id> -> id
+50: <comparison> -> <expression>
+51: <comparison> -> <expression> == <expression>
+52: <comparison> -> <expression> != <expression>
+53: <comparison> -> <expression> < <expression>
+54: <comparison> -> <expression> > <expression>
+55: <comparison> -> <expression> <= <expression>
+56: <comparison> -> <expression> >= <expression>
