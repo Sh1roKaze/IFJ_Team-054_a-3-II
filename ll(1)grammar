@@ -1,11 +1,11 @@
- 0: <file> -> <program>
- 1: <file> -> <class>
- 2: <file> -> $
- 3: <program> -> <class "Main"> <function "run">
- 4: <class> -> class <id> {
- 5: <class> -> <function>
- 6: <class> -> <staticvar>
- 7: <class> -> }
+ 0: <file> -> <class-list>
+ 1: <file> -> $
+ 2: <class-list> -> <class> <class-list>
+ 3: <class-list> -> $
+ 4: <class> -> class <id> { <class-item> }
+ 5: <class-item> -> <function> <class-item>
+ 6: <class-item> -> <staticvar> <class-item>
+ 7: <class-item> -> $
  8: <function> -> static <declaration> ( <arg-list> ) { <st-list> }
  9: <arg-list> -> <arg>
 10: <arg-list> -> <arg> ,  <arg-list>
@@ -22,9 +22,9 @@
 21: <statement> -> <call>
 22: <statement> -> <return>
 23: <assignment> -> <id> = <expression>;
-24: <block> -> {
-25: <block> -> <statement> <block>
-26: <block> -> }
+24: <block> -> { <block-list> }
+25: <block-list> -> <statement> <block-list>
+26: <block-list> -> $
 27: <condition> -> if ( <comparison> ) <block> else <block>
 28: <cycle> -> while ( <comparison> ) <block>
 29: <call> -> <id> = <id>( <arg-list> ) ;
