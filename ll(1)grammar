@@ -1,0 +1,58 @@
+ 1: <file> -> <class-list>
+ 2: <class-list> -> <class> <class-list>
+ 3: <class-list> -> $
+ 4: <class> -> class <id> { <class-item> }
+ 5: <class-item> -> <function> <class-item>
+ 6: <class-item> -> <staticvar> <class-item>
+ 7: <class-item> -> $
+ 8: <function> -> static <declaration> ( <arg-list> ) { <st-list> }
+ 9: <arg-list> -> <arg>
+10: <arg-list> -> <arg> ,  <arg-list>
+11: <arg-list> -> $
+12: <arg> -> <expression>
+13: <arg> -> <declaration>
+14: <st-list> -> <statement> ; <st-list>
+15: <st-list> -> <localvar>
+16: <st-list> -> $
+17: <statement> -> <assignment>
+18: <statement> -> <block>
+19: <statement> -> <condition>
+20: <statement> -> <cycle>
+21: <statement> -> <call>
+22: <statement> -> <return>
+23: <assignment> -> <id> = <expression>;
+24: <block> -> { <block-list> }
+25: <block-list> -> <statement> <block-list>
+26: <block-list> -> $
+27: <condition> -> if ( <comparison> ) <block> else <block>
+28: <cycle> -> while ( <comparison> ) <block>
+29: <call> -> <id> = <id>( <arg-list> ) ;
+30: <call> -> <id>( <arg-list> ) ;
+31: <return> -> return <expression> ;
+32: <expression> -> <term> + <expression>
+33: <expression> -> <term> - <expression>
+34: <expression> -> <term>
+35: <term> -> <factor> * <term>
+36: <term> -> <factor> / <term>
+37: <term> -> <factor>
+38: <factor> -> <literal>
+39: <factor> -> <id>
+40: <literal> -> <string>
+41: <literal> -> <number>
+42: <staticvar> -> static <declaration>
+43: <staticvar> -> static <declaration> = <expression> ;
+44: <localvar> -> <declaration>
+45: <localvar> -> <declaration> = <expression> ;
+46: <declaration> -> <type> <id>
+47: <type> -> int
+48: <type> -> string
+49: <type> -> double
+50: <id> -> class.id
+51: <id> -> id
+52: <comparison> -> <expression>
+53: <comparison> -> <expression> == <expression>
+54: <comparison> -> <expression> != <expression>
+55: <comparison> -> <expression> < <expression>
+56: <comparison> -> <expression> > <expression>
+57: <comparison> -> <expression> <= <expression>
+58: <comparison> -> <expression> >= <expression>
