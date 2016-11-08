@@ -1,21 +1,14 @@
 /* header */
 
-typedef struct tBTNode	{                              
+typedef struct tTNode	{                              
     char *key;                                         
-    struct tBTNode * LPtr;                               
-    struct tBTNode * RPtr; 	  	                         
-} *tBTNodePtr; 
-
-typedef struct tLLNode {
-    char *name;
-    struct tLLNode *next;
-} *tLLNodePtr;
-
-typedef struct tLList {
-    tLLNodePtr head;
-    tLLNodePtr active;
-} *tLLPtr;
-
+    struct tTNode LPtr;
+    struct tTNode MPtr;
+    struct tTNode RPtr; 	  	                         
+} *tTNodePtr; 
 
 /* prototypes */
+
+tTNodePtr derivationTree;
+
 int parser();

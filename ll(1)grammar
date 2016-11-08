@@ -1,5 +1,4 @@
- 0: <file> -> <class-list>
- 1: <file> -> $
+ 1: <file> -> <class-list>
  2: <class-list> -> <class> <class-list>
  3: <class-list> -> $
  4: <class> -> class <id> { <class-item> }
