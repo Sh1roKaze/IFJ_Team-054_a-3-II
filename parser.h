@@ -9,6 +9,8 @@ typedef struct tTNode	{
 
 /* prototypes */
 
-tTNodePtr derivationTree;
+tTNodePtr derivationTree; //Root of derivation tree
+token_t token; //global token variable
+int ret; //global return variable
 
 int parser();
