@@ -1,7 +1,7 @@
 /* header */
 
 typedef struct tTNode	{                              
-    char *key;                                         
+    type_t key;                                         
     struct tTNode LPtr;
     struct tTNode MPtr;
     struct tTNode RPtr; 	  	                         
