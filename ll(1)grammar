@@ -41,7 +41,7 @@
 41: <factor> -> <id>
 42: <literal> -> <string>
 43: <literal> -> <number>
-44: <staticvar> -> static <declaration>
+44: <staticvar> -> static <declaration> ;
 45: <staticvar> -> static <declaration> = <expression> ;
 46: <localvar> -> <declaration> ;
 47: <localvar> -> <declaration> = <expression> ;
