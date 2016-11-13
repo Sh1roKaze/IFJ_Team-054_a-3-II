@@ -1,11 +1,13 @@
 /* header */
 
 typedef struct tTNode	{                              
-    type_t key;                                         
+    type_t key;
+    char *literal;
     struct tTNode LPtr;
     struct tTNode MPtr;
     struct tTNode RPtr; 	  	                         
-} *tTNodePtr; 
+} *tTNodePtr;
+
 
 /* prototypes */
 

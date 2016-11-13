@@ -30,31 +30,36 @@
 30: <par> -> <declaration>
 31: <par> -> <expression>
 32: <return> -> return <expression>
-33: <expression> -> <term> + <expression>
-34: <expression> -> <term> - <expression>
-35: <expression> -> <term>
-36: <term> -> <factor> * <term>
-37: <term> -> <factor> / <term>
-38: <term> -> <factor>
-39: <factor> -> <call>
-40: <factor> -> <literal>
-41: <factor> -> <id>
-42: <literal> -> <string>
-43: <literal> -> <number>
-44: <staticvar> -> static <declaration> ;
-45: <staticvar> -> static <declaration> = <expression> ;
-46: <localvar> -> <declaration> ;
-47: <localvar> -> <declaration> = <expression> ;
-48: <declaration> -> <type> <id>
-49: <type> -> int
-50: <type> -> string
-51: <type> -> double
-52: <id> -> class.id
-53: <id> -> id
-54: <comparison> -> <expression>
-55: <comparison> -> <expression> == <expression>
-56: <comparison> -> <expression> != <expression>
-57: <comparison> -> <expression> < <expression>
-58: <comparison> -> <expression> > <expression>
-59: <comparison> -> <expression> <= <expression>
-60: <comparison> -> <expression> >= <expression>
+33: <parenthesis> -> ( <expression> )
+34: <expression> -> <parenthesis> + <expression>
+35: <expression> -> <parenthesis> - <expression>
+36: <expression> -> <term> + <expression>
+37: <expression> -> <term> - <expression>
+38: <expression> -> <term>
+39: <term> -> <parenthesis> * <term>
+40: <term> -> <parenthesis> / <term>
+41: <term> -> <factor> * <term>
+42: <term> -> <factor> / <term>
+43: <term> -> <factor>
+44: <factor> -> <call>
+45: <factor> -> <literal>
+46: <factor> -> <id>
+47: <literal> -> <string>
+48: <literal> -> <number>
+49: <staticvar> -> static <declaration> ;
+50: <staticvar> -> static <declaration> = <expression> ;
+51: <localvar> -> <declaration> ;
+52: <localvar> -> <declaration> = <expression> ;
+53: <declaration> -> <type> <id>
+54: <type> -> int
+55: <type> -> string
+56: <type> -> double
+57: <id> -> class.id
+58: <id> -> id
+59: <comparison> -> <expression>
+60: <comparison> -> <expression> == <expression>
+61: <comparison> -> <expression> != <expression>
+62: <comparison> -> <expression> < <expression>
+63: <comparison> -> <expression> > <expression>
+64: <comparison> -> <expression> <= <expression>
+65: <comparison> -> <expression> >= <expression>
