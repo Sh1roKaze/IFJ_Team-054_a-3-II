@@ -42,7 +42,7 @@
          tree->key = CLASS_LIST;
          tree->LPtr = malloc(sizeof(struct tTNode));
 
-         ret = class(temp->LPtr);
+         ret = class(tree->LPtr);
          if (ret == ERROR_CODE) {
             return ERROR; //error in class
          }
@@ -57,7 +57,7 @@ int class(tTNodePtr tree) {
     if (token->type == KEYWORD_CLASS) {
         tree->key = CLASS;
         tree->LPtr = malloc(sizeof(struct tTNode));
-        tree->RPtr = NULL;
+        tree->RPtr = malloc(sizeof(struct tTNode));
         ret = id(tree->LPtr);
         if (ret == ERROR_CODE) {
             return ERROR; //non valid id
@@ -67,7 +67,7 @@ int class(tTNodePtr tree) {
             return ERROR; //no curly bracket
         }
         token = get_token();
-        while (token->type != "}") {
+        while (!accept(RIGHT_CURLY_BRACKET)) {
             tree->RPtr = malloc(sizeof(struct tTNode));
             ret = classitem(tree->RPtr);
             if (ret == ERROR_CODE) {
@@ -95,15 +95,14 @@ int classitem(tTNodePtr tree) {
         }
         token = get_token();
         tree->LPtr = malloc(sizeof(struct tTNode));
-        if (token->type == "(") {
+        if (accept(LEFT_PARENTHESIS)) {
             ret = function(tree->LPtr,temp);            
-        } else if (token->type == "=" || token->type == ";") {
+        } else if (accept(EQUAL_TO_OPERATOR) || accept(SEMICOLON)) {
             ret = staticvar(tree->LPtr,temp);
         } else {
             return ERROR; //neither function nor static var
         }
         return 0; //all is right
-        }
     } else {
         return ERROR;
     }
@@ -148,7 +147,7 @@ int staticvar(tTNodePtr tree, tTNodePtr temp) {
     if (token->type == EQUAL_TO_OPERATOR) {
         tree->RPtr = malloc(sizeof(struct tTNode));
         token = get_token();
-        ret = assigment(tree->RPtr);
+        ret = assignment(tree->RPtr);
         if (ret == ERROR_CODE) {
             return ERROR;
         }
@@ -337,7 +336,7 @@ int block(tTNodePtr tree) {
 
 
 int blocklist(tTNodePtr tree) {
-    if (accept(RIGHT_CURLY_BRACKET) {
+    if (accept(RIGHT_CURLY_BRACKET)) {
         return 0;
     }
     while (1) {
@@ -348,7 +347,7 @@ int blocklist(tTNodePtr tree) {
             return ERROR;
         }
         tree->RPtr = malloc(sizeof(struct tTNode));
-        tree = tree->RPtr
+        tree = tree->RPtr;
     }
     free(tree->RPtr);
     return 0;
@@ -447,24 +446,6 @@ int call(tTNodePtr tree) {
     return 0;
 }
 
-int blocklist(tTNodePtr tree) {
-    if (accept(RIGHT_PARENTHESIS) {
-        return 0;
-    }
-    while (1) {
-        tree->key = PAR_LIST;
-        tree->LPtr = malloc(sizeof(struct tTNode));
-        ret = parameter(tree->LPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
-        }
-        tree->RPtr = malloc(sizeof(struct tTNode));
-        tree = tree->RPtr
-    }
-    free(tree->RPtr);
-    return 0;
-}
-
 
 int parameter(tTNodePtr tree) {
     tree->key = PARAMETER;
@@ -501,7 +482,7 @@ int expression(tTNodePtr tree) {
     tree->LPtr = malloc(sizeof(struct tTNode));
     token = get_token();
     if (accept(LEFT_PARENTHESIS)) {
-        ret = paranthesis(tree->LPtr);
+        ret = parenthesis(tree->LPtr);
     } else {
         ret = term(tree->LPtr);
     }
@@ -516,7 +497,7 @@ int expression(tTNodePtr tree) {
         token = get_token();
         tree->RPtr = malloc(sizeof(struct tTNode));        
         if (accept(LEFT_PARENTHESIS)) {
-            ret = paranthesis(tree->RPtr);
+            ret = parenthesis(tree->RPtr);
         } else {
             ret = term(tree->RPtr);
         }
@@ -548,7 +529,7 @@ int term(tTNodePtr tree) {
     tree->LPtr = malloc(sizeof(struct tTNode));  
     token = get_token();  
     if (accept(LEFT_PARENTHESIS)) {
-        ret = paranthesis(tree->LPtr);
+        ret = parenthesis(tree->LPtr);
     } else {
         ret = factor(tree->LPtr);
     }
@@ -561,7 +542,7 @@ int term(tTNodePtr tree) {
         token = get_token();
         tree->RPtr = malloc(sizeof(struct tTNode));
         if (accept(LEFT_PARENTHESIS)) {
-            ret = paranthesis(tree->RPtr);
+            ret = parenthesis(tree->RPtr);
         } else {
             ret = factor(tree->RPtr);
         }
