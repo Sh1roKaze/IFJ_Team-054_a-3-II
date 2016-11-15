@@ -27,7 +27,7 @@
 27: <call> -> <id>( <par-list> )
 28: <par-list> -> <par> ,  <par-list>
 29: <par-list> -> $
-30: <par> -> <declaration>
+30: <par> -> <id>
 31: <par> -> <expression>
 32: <return> -> return <expression>
 33: <parenthesis> -> ( <expression> )
