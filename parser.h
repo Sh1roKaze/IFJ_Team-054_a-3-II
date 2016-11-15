@@ -1,4 +1,7 @@
 /* header */
+
+#include "token.h"
+
 typedef enum {
     CLASS_LIST,
     CLASS,
@@ -23,12 +26,12 @@ typedef enum {
     EXPRESSION,
     TERM,
     FACTOR,
-    STRING_LITERAL
-    INT_LITERAL,
-    DOUBLE_LITERAL,
-    INT_DATA_TYPE,
-    STRING_DATA_TYPE,
-    DOUBLE_DATA_TYPE,
+    STRING,
+    INT,
+    DOUBLE,
+    INT_DATA,
+    STRING_DATA,
+    DOUBLE_DATA,
     ID,
     COMPARISON   
 } node_t;
@@ -44,7 +47,7 @@ typedef struct tTNode	{
 /* prototypes */
 
 tTNodePtr derivationTree; //Root of derivation tree
-token_t token; //global token variable
+struct Token *token; //global token variable
 int ret; //global return variable
 
 int parser();
