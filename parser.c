@@ -18,7 +18,7 @@
  int classList(tTNodePtr tree) {
      token = get_token();
      if (token == NULL) {
-         return ERROR; //file empty
+         return 2; //file empty
      }
 
      tree = malloc(sizeof(struct tTNode));
@@ -27,8 +27,8 @@
      tree->RPtr = malloc(sizeof(struct tTNode));
 
      ret = class(tree->LPtr);
-     if (ret == ERROR_CODE) {
-         return ERROR;
+     if (ret == 2) {
+         return 2;
      } 
      
      tree = tree->RPtr;
@@ -43,8 +43,8 @@
          tree->LPtr = malloc(sizeof(struct tTNode));
 
          ret = class(tree->LPtr);
-         if (ret == ERROR_CODE) {
-            return ERROR; //error in class
+         if (ret == 2) {
+            return 2; //error in class
          }
 
          tree->RPtr = malloc(sizeof(struct tTNode));
@@ -59,19 +59,19 @@ int class(tTNodePtr tree) {
         tree->LPtr = malloc(sizeof(struct tTNode));
         tree->RPtr = NULL;
         ret = id(tree->LPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR; //non valid id
+        if (ret == 2) {
+            return 2; //non valid id
         }
         token = get_token();
         if (!accept(LEFT_CURLY_BRACKET)) {
-            return ERROR; //no curly bracket
+            return 2; //no curly bracket
         }
         token = get_token();
         while (!accept(RIGHT_CURLY_BRACKET)) {
             tree->RPtr = malloc(sizeof(struct tTNode));
             ret = classitem(tree->RPtr);
-            if (ret == ERROR_CODE) {
-                return ERROR; //error in classitem
+            if (ret == 2) {
+                return 2; //error in classitem
             }
             tree->RPtr = malloc(sizeof(struct tTNode));
             tree = tree->RPtr;
@@ -79,7 +79,7 @@ int class(tTNodePtr tree) {
         }
         return 0; //everything works
     } else {
-        return ERROR; //not a class
+        return 2; //not a class
     }
 }
 
@@ -90,8 +90,8 @@ int classitem(tTNodePtr tree) {
         tTNodePtr temp = malloc(sizeof(struct tTNode));
         token = get_token();
         ret = declaration(temp);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
         token = get_token();
         tree->LPtr = malloc(sizeof(struct tTNode));
@@ -100,11 +100,11 @@ int classitem(tTNodePtr tree) {
         } else if (accept(EQUAL_TO_OPERATOR) || accept(SEMICOLON)) {
             ret = staticvar(tree->LPtr,temp);
         } else {
-            return ERROR; //neither function nor static var
+            return 2; //neither function nor static var
         }
         return 0; //all is right
     } else {
-        return ERROR;
+        return 2;
     }
 }
 
@@ -118,24 +118,24 @@ int function(tTNodePtr tree, tTNodePtr temp) {
     tree->key = FUNCTION;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = arglist(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     if (!accept(RIGHT_PARENTHESIS)) {
-        return ERROR;    
+        return 2;    
     }
     token = get_token();
     if (!accept(LEFT_CURLY_BRACKET)) {
-        return ERROR;    
+        return 2;    
     }
     tree->RPtr = malloc(sizeof(struct tTNode));
     token = get_token();
     ret = stlist(tree->RPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     } 
     if (accept(RIGHT_CURLY_BRACKET)) {
-        return ERROR;    
+        return 2;    
     }
     return 0;
 }
@@ -148,8 +148,8 @@ int staticvar(tTNodePtr tree, tTNodePtr temp) {
         tree->RPtr = malloc(sizeof(struct tTNode));
         token = get_token();
         ret = assignment(tree->RPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
     }
     return 0;
@@ -160,14 +160,14 @@ int declaration(tTNodePtr tree) {
     tree->key = DECLARATION;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = type(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     tree->RPtr = malloc(sizeof(struct tTNode));
     token = get_token();
     ret = id(tree->RPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0;
 }
@@ -180,8 +180,8 @@ int arglist(tTNodePtr tree) {
     }
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = argument(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     while (1) {
         token = get_token();
@@ -189,8 +189,8 @@ int arglist(tTNodePtr tree) {
             token = get_token();
             tree->RPtr = malloc(sizeof(struct tTNode));
             ret = argument(tree->RPtr);
-            if (ret == ERROR_CODE) {
-                return ERROR;
+            if (ret == 2) {
+                return 2;
             }
             tree = tree->RPtr;
         } else {
@@ -200,7 +200,7 @@ int arglist(tTNodePtr tree) {
     if (token->type == RIGHT_PARENTHESIS) {
         return 0;
     } else {
-        return ERROR;
+        return 2;
     }
 }
 
@@ -209,8 +209,8 @@ int argument(tTNodePtr tree) {
      tree->LPtr = malloc(sizeof(struct tTNode));
      tree->key = ARG;
      ret = declaration(tree->LPtr);
-     if (ret == ERROR_CODE) {
-         return ERROR;
+     if (ret == 2) {
+         return 2;
      }
      return 0;
 }
@@ -224,10 +224,10 @@ int stlist(tTNodePtr tree) {
         tree->key = ST_LIST;
         tree->LPtr = malloc(sizeof(struct tTNode));
         ret = localvar(tree->LPtr);
-        if (ret == ERROR_CODE) {
+        if (ret == 2) {
             ret = statement(tree->LPtr);
-            if (ret == ERROR_CODE) {
-                return ERROR;
+            if (ret == 2) {
+                return 2;
             }
         }
         tree->RPtr = malloc(sizeof(struct tTNode));
@@ -241,20 +241,20 @@ int localvar(tTNodePtr tree) {
     tree->key = LOCAL_VAR;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = declaration(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     token = get_token();
     if (accept(EQUAL_TO_OPERATOR)) {
         token = get_token();
         tree->RPtr = malloc(sizeof(struct tTNode));
         ret = assignment(tree->RPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
     }
     if (token->type != SEMICOLON) {
-        return ERROR;
+        return 2;
     }
     return 0;
 }
@@ -264,35 +264,35 @@ int statement(tTNodePtr tree) {
     tree->key = STATEMENT;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = assignment(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         token = get_token();
         return accept(SEMICOLON);
     }
     ret = block(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         return 0;
     }
     ret = condition(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         return 0;
     }
     ret = cycle(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         return 0;
     }
     ret = call(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         token = get_token();
         return accept(SEMICOLON);
     }
     free((tree->LPtr)->LPtr);
     ret = retval(tree->LPtr);
-    if (ret != ERROR_CODE) {
+    if (ret != 2) {
         token = get_token();
         return accept(SEMICOLON);
     }
 
-    return ERROR;
+    return 2;
 } 
 
 
@@ -300,15 +300,15 @@ int assignment(tTNodePtr tree) {
     tree->key = ASSIGNMENT;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = declaration(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     token = get_token();
     if (accept(ASSIGNMENT_OPERATOR)) {
         tree->RPtr = malloc(sizeof(struct tTNode));
         ret = assignment(tree->RPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
     }
     return 0;
@@ -321,16 +321,16 @@ int block(tTNodePtr tree) {
         tree->LPtr = malloc(sizeof(struct tTNode));
         token = get_token();
         ret = blocklist(tree->LPtr);
-        if (ret = ERROR_CODE) {
-            return ERROR;
+        if (ret = 2) {
+            return 2;
         }
     } else {
-        return ERROR;
+        return 2;
     }
     if (accept(RIGHT_CURLY_BRACKET)) {
         return 0;
     } else {
-        return ERROR;
+        return 2;
     }
 }
 
@@ -343,8 +343,8 @@ int blocklist(tTNodePtr tree) {
         tree->key = BLOCK_LIST;
         tree->LPtr = malloc(sizeof(struct tTNode));
         ret = statement(tree->LPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
         tree->RPtr = malloc(sizeof(struct tTNode));
         tree = tree->RPtr;
@@ -357,21 +357,21 @@ int blocklist(tTNodePtr tree) {
 int condition(tTNodePtr tree) {
     tree->key = CONDITION;
     if (!accept(KEYWORD_IF)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     if (!accept(LEFT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = comparison(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     token = get_token();
     if (!accept(RIGHT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     tree->RPtr = malloc(sizeof(struct tTNode));
@@ -379,18 +379,18 @@ int condition(tTNodePtr tree) {
     tree->key = CONDITION;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = block(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     token = get_token();
     if (!accept(KEYWORD_ELSE)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     tree->RPtr = malloc(sizeof(struct tTNode));
     ret = block(tree->RPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0;
 }
@@ -399,27 +399,27 @@ int condition(tTNodePtr tree) {
 int cycle(tTNodePtr tree) {
     tree->key = CYCLE;
     if (!accept(KEYWORD_WHILE)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     if (!accept(LEFT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = comparison(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     token = get_token();
     if (!accept(RIGHT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     token = get_token();
     tree->RPtr = malloc(sizeof(struct tTNode));
     ret = block(tree->RPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0;
 }
@@ -429,19 +429,19 @@ int call(tTNodePtr tree) {
     tree->key = CALL;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = id(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     if (!accept(LEFT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     tree->RPtr = malloc(sizeof(struct tTNode));
     ret = parlist(tree->RPtr);
-    if (ret = ERROR_CODE) {
-        return ERROR;
+    if (ret = 2) {
+        return 2;
     }
     if (!accept(RIGHT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     return 0;
 }
@@ -480,13 +480,13 @@ int parlist(tTNodePtr tree) {
 
 
 int parameter(tTNodePtr tree) {
-    tree->key = PARAMETER;
+    tree->key = PAR;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = declaration(tree->LPtr);
-    if (ret == ERROR_CODE) {
+    if (ret == 2) {
         ret = expression(tree->LPtr);
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
         return 0;
     }
@@ -502,8 +502,8 @@ int retval(tTNodePtr tree) {
     tree->LPtr = malloc(sizeof(struct tTNode));
     token = get_token();
     ret = expression(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0;
 }
@@ -518,8 +518,8 @@ int expression(tTNodePtr tree) {
     } else {
         ret = term(tree->LPtr);
     }
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
 
     tree->key = EXPRESSION;
@@ -533,8 +533,8 @@ int expression(tTNodePtr tree) {
         } else {
             ret = term(tree->RPtr);
         }
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
         token = get_token();
         tree = tree->RPtr;
@@ -546,11 +546,11 @@ int expression(tTNodePtr tree) {
 
 int parenthesis(tTNodePtr tree) {
     ret = expression(tree);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     if (!accept(RIGHT_PARENTHESIS)) {
-        return ERROR;
+        return 2;
     }
     return 0;
 }
@@ -565,8 +565,8 @@ int term(tTNodePtr tree) {
     } else {
         ret = factor(tree->LPtr);
     }
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
 
     token = get_token();
@@ -578,8 +578,8 @@ int term(tTNodePtr tree) {
         } else {
             ret = factor(tree->RPtr);
         }
-        if (ret == ERROR_CODE) {
-            return ERROR;
+        if (ret == 2) {
+            return 2;
         }
         token = get_token();
         tree = tree->RPtr;
@@ -594,7 +594,7 @@ int factor(tTNodePtr tree) {
     tTNodePtr temp = malloc(sizeof(struct tTNode));
     token = get_token();
     ret = call(temp);
-    if (ret == ERROR) {
+    if (ret == 2) {
         if (temp->LPtr != NULL) {
             tree->LPtr = temp->LPtr;
             return 0;
@@ -602,8 +602,8 @@ int factor(tTNodePtr tree) {
     }
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = literal(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0;
 }
@@ -613,39 +613,39 @@ int literal(tTNodePtr tree) {
     tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
     strcpy(tree->literal, token->data);
     if (accept(STRING_LITERAL)) {
-        tree->key = STRING_LITERAL;
+        tree->key = STRING;
         tree->LPtr = malloc(sizeof(struct tTNode));
     }
     if (accept(INT_LITERAL) || accept(DOUBLE_LITERAL)) {
-        tree->key = token->type;
+        tree->key = INT;
         tree->LPtr = malloc(sizeof(struct tTNode));
         //actual number
     }
-    return ERROR;
+    return 2;
 }
 
 
 int type(tTNodePtr tree) {
     if (accept(INT_DATA_TYPE)) {
-        tree->key = INT_DATA_TYPE;
+        tree->key = INT_DATA;
         return 0;
     }
     if (accept(STRING_DATA_TYPE)) {
-        tree->key = STRING_DATA_TYPE;
+        tree->key = STRING_DATA;
         return 0;
     }
     if (accept(DOUBLE_DATA_TYPE)) {
-        tree->key = DOUBLE_DATA_TYPE;
+        tree->key = DOUBLE_DATA;
         return 0;
     }
 
-    return ERROR;
+    return 2;
 }
 
 
 int id(tTNodePtr tree) {
     if (!accept(IDENTIFIER)) {
-        return ERROR;
+        return 2;
     }
     tree->key = ID;
     tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
@@ -658,18 +658,18 @@ int comparison(tTNodePtr tree) {
     tree->key = COMPARISON;
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = expression(tree->LPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     if (!accept(GREATER_THAN_OPERATOR) && !accept(LESS_THAN_OPERATOR) && !accept(GREATER_THAN_OR_EQUAL_TO_OPERATOR)) {
         if (!accept(LESS_THAN_OR_EQUAL_TO_OPERATOR) && !accept(EQUAL_TO_OPERATOR) && !accept(NOT_EQUAL_TO_OPERATOR)) {
-            return ERROR;       
+            return 2;       
         }
     }    
     tree->RPtr = malloc(sizeof(struct tTNode));
     ret = expression(tree->RPtr);
-    if (ret == ERROR_CODE) {
-        return ERROR;
+    if (ret == 2) {
+        return 2;
     }
     return 0; 
 }
