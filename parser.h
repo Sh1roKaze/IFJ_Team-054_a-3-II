@@ -32,6 +32,7 @@ typedef enum {
     INT_DATA,
     STRING_DATA,
     DOUBLE_DATA,
+    VOID_DATA,
     ID,
     COMPARISON   
 } node_t;
