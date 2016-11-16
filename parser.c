@@ -1,12 +1,46 @@
 #include "parser.h"
 
+int file(tTNodePtr tree);
+int classList(tTNodePtr tree);
+int class(tTNodePtr tree);
+int classitem(tTNodePtr tree);
+int function(tTNodePtr tree, tTNodePtr temp);
+int staticvar(tTNodePtr tree, tTNodePtr temp);
+int declaration(tTNodePtr tree);
+int arglist(tTNodePtr tree);
+int argument(tTNodePtr tree);
+int stlist(tTNodePtr tree);
+int localvar(tTNodePtr tree);
+int statement(tTNodePtr tree);
+int assignment(tTNodePtr tree);
+int block(tTNodePtr tree);
+int blocklist(tTNodePtr tree);
+int condition(tTNodePtr tree);
+int cycle(tTNodePtr tree);
+int call(tTNodePtr tree);
+int parlist(tTNodePtr tree);
+int parameter(tTNodePtr tree);
+int retval(tTNodePtr tree);
+int expression(tTNodePtr tree);
+int parenthesis(tTNodePtr tree);
+int term(tTNodePtr tree);
+int factor(tTNodePtr tree);    
+int literal(tTNodePtr tree);
+int id(tTNodePtr tree);
+int type(tTNodePtr tree);
+int comparison(tTNodePtr tree);
+
  inline void treeInit(tTNodePtr tree) {
      tree = NULL;
  }
 
 
- inline int accept(type_t sym) {
-     return (token->type == sym);
+int accept(type_t sym) {
+    if (token != NULL) {
+     	return (int) (token->type == sym);
+    } else {
+        return 0;
+    }
  }
 
 
@@ -58,6 +92,7 @@ int class(tTNodePtr tree) {
         tree->key = CLASS;
         tree->LPtr = malloc(sizeof(struct tTNode));
         tree->RPtr = NULL;
+        token = get_token();
         ret = id(tree->LPtr);
         if (ret == 2) {
             return 2; //non valid id
@@ -616,10 +651,18 @@ int literal(tTNodePtr tree) {
         tree->key = STRING;
         tree->LPtr = malloc(sizeof(struct tTNode));
     }
-    if (accept(INT_LITERAL) || accept(DOUBLE_LITERAL)) {
+    if (accept(INT_LITERAL)) {
         tree->key = INT;
         tree->LPtr = malloc(sizeof(struct tTNode));
-        //actual number
+        tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
+        strcpy(tree->literal, token->data);
+    }
+
+    if (accept(DOUBLE_LITERAL)) {
+        tree->key = INT;
+        tree->LPtr = malloc(sizeof(struct tTNode));
+        tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
+        strcpy(tree->literal, token->data);
     }
     return 2;
 }
@@ -636,6 +679,11 @@ int type(tTNodePtr tree) {
     }
     if (accept(DOUBLE_DATA_TYPE)) {
         tree->key = DOUBLE_DATA;
+        return 0;
+    }
+
+    if (accept(VOID_DATA_TYPE)) {
+        tree->key = VOID_DATA;
         return 0;
     }
 
