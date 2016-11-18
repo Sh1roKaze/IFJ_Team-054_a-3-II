@@ -21,11 +21,12 @@ typedef parsHT_Item *parsHT_Table[PARSHT_SIZE]; // Hash htable
 // htptr - must be alredy allocated
 void parsHT_Init(parsHT_Table *htptr);
 
-// Search item with the same id (key)
+// Search item with the same id and the same types
 // htptr - pointer to table
 // id - id to be search for
+// types - specific types combination ("types" value of item)
 // returns pointer to the found item or NULL
-patsHT_Item *parsHT_Search(parsHT_Table *htptr, char *id);
+patsHT_Item *parsHT_Search(parsHT_Table *htptr, char *id, char *types);
 
 // Insert item to table. Call the search
 // htptr - pointer to table
