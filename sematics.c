@@ -61,146 +61,177 @@ int sematics(tTNodePtr ptr){
             return 0;// maybe -1 or delete
 }
 
+int 
 
 int load_static (tTNodePtr ptr, parsHT_Table *HTable){      
       tStackPtr *S;
       char *ActClass = NULL;
       int error = 0;
-      char *typs = NULL;
-      char *help = NULL;
-      char *name = NULL;
-      char typ = '';
-      parsHT_Init(HTable);
+
       SInit (S);
       SPush (S, ptr);
       do{
             ptr = STopPop (S);
             //CLASS_LIST
             if (ptr != NULL && ptr->key == CLASS_LIST){
-                  if (ptr->RPtr != NULL)
-                        SPush (S, ptr->RPtr);
-                  ptr = ptr->LPtr;
+                  ptr = push_right_go_left (ptr, S);
             }
+            
             //CLASS
             if (ptr != NULL && ptr->key == CLASS){
-                  if (ptr->RPtr != NULL)
-                        SPush (S, ptr->RPtr);
-                  ptr = ptr->LPtr;
+                  ptr = push_right_go_left (ptr, S);
                   ActClass = ptr->literal;
                   ptr = STopPop (S);            
             }
             //CLASS_ITEM
             if (ptr != NULL && ptr->key == CLASS_ITEM){
-                  if (ptr->RPtr != NULL)
-                        SPush (S, ptr->RPtr);
-                  ptr = ptr->LPtr;
+                  ptr = push_right_go_left (ptr, S);
             }
             //STATIC_VAR
             if (ptr != NULL && ptr->key == STATIC_VAR){
-                  ptr = ptr->LPtr;
-                  //DECLARATION
-                  SPush (S, ptr->RPtr);
-                  ptr = ptr->LPtr;
-                  //Type
-                  load_typ (ptr->key, &typ); //load typ of var {I,D,S} to typ
-                  if (typ == 'V'){
-                        parsHT_Dispose(HTable);
-                        free(typs)
-                        DStack (S);
-                        return 6;                  
-                  }
-                  typs = add_typ_before_types ('P', &typ);
-                  if (typs == NULL){
-                        parsHT_Dispose(HTable);
-                        DStack (S);      
-                        return 99;
-                  }
-                  ptr = STopPop (S);
-                  //ID
-                  name = ptr->literal;
-                  name = add_class_before_name (ActClass, name, &error);
-                  if (name == NULL){
-                        parsHT_Dispose(HTable);
-                        free(typs);
-                        DStack (S);      
-                        return (error == 99) ? 99 : 6;       
-                  }
-                  if (parsHT_Search(HTable, name, typs) == NULL){
-                        parsHT_Insert(HTable, name, typs);
-                        free(name);
-                        free(typs);           
-                  }
-                  else{
-                        parsHT_Dispose(HTable);
-                        free(name);
-                        free(typs);
-                        DStack (S);
-                        return 3;      
-                  }      
+                  error = static_var_htinsert(&ptr, S, ActClass, HTable);
+                  if (error != 0)
+                        return error;      
             }
             //FUNCTION
             if (ptr != NULL && ptr->key == FUNCTION){  
-                  SPush (S, ptr->RPtr);
-                  ptr = ptr->LPtr;
-                  //DECLARATION
-                  SPush (S, ptr->RPtr);      
-                  ptr = ptr->LPtr;
-                  //Typ
-                  load_typ (ptr->key, &typ);
-                  typs = add_typ_before_types ('F', &typ);
-                  ptr = STopPop (S);
-                  //ID
-                  name = ptr->literal;
-                  name = add_class_before_name (ActClass, name, &error);
-                  if (name == NULL){
-                        parsHT_Dispose(HTable);
-                        free(typs);
-                        DStack (S);      
-                        return (error == 99) ? 99 : 6;       
-                  }
-                  ptr = STopPop (S);
-                  //FUNCTION 2
-                  ptr = ptr->LPtr;
-                  //ARG_LIST
-                  SPush (S, ptr);
-                  while(STop(S) != NULL && (STop(S))->key == ARG_LIST){ //Load params to typs
-                        ptr = STopPop (S);
-                        if (ptr->LPtr != NULL){
-                              if (ptr->RPtr != NULL)
-                                    SPush (S, ptr->RPtr);
-                              ptr = ptr->LPtr;
-                              //DECLARATION
-                              ptr = ptr->LPtr;
-                              //TYP
-                              load_typ (ptr->key, &typ);
-                              help = add_char_behind_types (typs, typ);
-                              free(typs);
-                              if (help == NULL){
-                                    parsHT_Dispose(HTable);
-                                    free(name);
-                                    DStack (S);      
-                                    return 99;                             
-                              }
-                              typs = help;           
-                        }
-                  }
-                  if (parsHT_Search(HTable, name, typs) == NULL){
-                        parsHT_Insert(HTable, name, typs);
-                        free(name);
-                        free(typs);           
-                  }
-                  else{
-                        parsHT_Dispose(HTable);
-                        free(name);
-                        free(typs);
-                        DStack (S);
-                        return 3;      
-                  }                        
+                  error = function_htinsert(&ptr, S, ActClass, HTable);
+                  if (error != 0)
+                        return error;                        
             }
       }while (SEmpty (S));
       
       return 0;     
 }      
+
+int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_Table *HTable){
+      char typ = '';
+      char *typs = NULL;
+      char *name = NULL; 
+      char *help = NULL;    
+      int error = 0;  
+      tTNodePtr ptr;
+      
+      ptr = *original;
+      SPush (S, ptr->RPtr);
+      ptr = ptr->LPtr;
+      //DECLARATION
+      SPush (S, ptr->RPtr);      
+      ptr = ptr->LPtr;
+      //Typ
+      load_typ (ptr->key, &typ);
+      typs = add_typ_before_types ('F', &typ);
+      ptr = STopPop (S);
+      //ID
+      name = ptr->literal;
+      name = add_class_before_name (ActClass, name, &error);
+      if (name == NULL){
+            parsHT_Dispose(HTable);
+            free(typs);
+            DStack (S);      
+            return (error == 99) ? 99 : 6;       
+      }
+      ptr = STopPop (S);
+      //FUNCTION 2
+      ptr = ptr->LPtr;
+      //ARG_LIST
+      SPush (S, ptr);
+      while(SEmpty (S) != 1 && (STop(S))->key == ARG_LIST){ //Load params to typs
+            ptr = STopPop (S);
+            if (ptr->LPtr != NULL){
+                  ptr = push_right_go_left (ptr, S);
+                  //DECLARATION
+                  ptr = ptr->LPtr;
+                  //TYP
+                  load_typ (ptr->key, &typ);
+                  help = add_char_behind_types (typs, typ);
+                  free(typs);
+                  if (help == NULL){
+                        parsHT_Dispose(HTable);
+                        free(name);
+                        DStack (S);      
+                        return 99;                             
+                  }
+                  typs = help;           
+            }
+      }
+      if (parsHT_Search(HTable, name, typs) == NULL){
+            parsHT_Insert(HTable, name, typs);
+            free(name);
+            free(typs);           
+      }
+      else{
+            parsHT_Dispose(HTable);
+            free(name);
+            free(typs);
+            DStack (S);
+            return 3;      
+      }
+
+      *original = ptr;
+      return 0;
+         
+}
+
+int static_var_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_Table *HTable){
+      char typ = '';
+      char *typs = NULL;
+      char *name = NULL;    
+      int error = 0;  
+      tTNodePtr ptr; 
+
+      ptr = *original;
+      ptr = ptr->LPtr;
+      //DECLARATION      
+      SPush (S, ptr->RPtr);      
+      ptr = ptr->LPtr;
+      //Type
+      load_typ (ptr->key, &typ); //load typ of var {I,D,S} to typ
+      if (typ == 'V'){
+            parsHT_Dispose(HTable);
+            free(typs)
+            DStack (S);
+            return 6;                  
+      }
+      typs = add_typ_before_types ('P', &typ);
+      if (typs == NULL){
+            parsHT_Dispose(HTable);
+            DStack (S);      
+            return 99;
+      }
+      ptr = STopPop (S);
+      //ID
+      name = ptr->literal;
+      name = add_class_before_name (ActClass, name, &error);
+      if (name == NULL){
+            parsHT_Dispose(HTable);
+            free(typs);
+            DStack (S);      
+            return (error == 99) ? 99 : 6;       
+      }
+      if (parsHT_Search(HTable, name, typs) == NULL){
+            parsHT_Insert(HTable, name, typs);
+            free(name);
+            free(typs);           
+            }
+      else{
+            parsHT_Dispose(HTable);
+            free(name);
+            free(typs);
+            DStack (S);
+            return 3;      
+      }
+
+      *original = ptr;
+      return 0; 
+}
+
+
+tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S){
+       if (ptr->RPtr != NULL)
+            SPush (S, ptr->RPtr);
+       return ptr->LPtr;
+}
 
 char* add_class_before_name (char *class, char *name, int *error){
       size_t size;
