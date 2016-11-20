@@ -10,8 +10,12 @@
 typedef struct parsHT_Item {
 	char *id; // ID and key
 	struct parsHT_Item *next; // Next synonyms pointer
+	void *valptr; // Pointer to value of variable
 	int n; // length of types array
-	char []types; // variable: V[IDS]0, function F[VIDS][IDS]*0
+	char []types;
+	// types[0] = V/F(variable/function)
+	// types[1] = V/I/D/S(void/int/double/string) type of variable or return type of function
+	// types[2..n-1] = I/D/S(int/double/string) parameters' types of function
 } parsHT_Item;
 
 #define PARSHT_SIZE 503 // Hash table size
@@ -26,7 +30,7 @@ void parsHT_Init(parsHT_Table *htptr);
 // id - id to be search for
 // types - specific types combination ("types" value of item)
 // returns pointer to the found item or NULL
-patsHT_Item *parsHT_Search(parsHT_Table *htptr, char *id, char *types);
+patsHT_Item *parsHT_Search(parsHT_Table *htptr, char *id);
 
 // Insert item to table. Call the search
 // htptr - pointer to table
