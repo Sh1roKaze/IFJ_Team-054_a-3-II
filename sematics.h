@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "stack.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
