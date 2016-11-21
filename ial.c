@@ -87,7 +87,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id)
 // id - id of inserter item
 // types - data of inserter item
 // returns pointer to inserted item of NULL in case of malloc error
-IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
+IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 {
 	if (htptr == NULL || id == NULL || types == NULL)
 		return NULL;
@@ -120,7 +120,7 @@ IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
 }
 
 // Remove all the items and free memory allocated for items
-IAL_htDispose(IAL_HashTable *htptr)
+void IAL_htDispose(IAL_HashTable *htptr)
 {
 	if (htptr == NULL)
 		return;
