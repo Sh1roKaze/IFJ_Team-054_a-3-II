@@ -3,7 +3,6 @@
 // (c) Antonín Vlach
 // V rámci projektu do předmětů IFJ a IAL
 
-
 #ifndef IAL_
 #define IAL_
 
