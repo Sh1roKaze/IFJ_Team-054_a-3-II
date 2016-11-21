@@ -91,6 +91,8 @@ IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 {
 	if (htptr == NULL || id == NULL || types == NULL)
 		return NULL;
+	if (IAL_htSearch(htptr, id) != NULL)
+		return NULL;
 
 	int hash = IAL_hashCode(id);
 	int idLength = strlen(id);
