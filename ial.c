@@ -86,13 +86,16 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id)
 // htptr - pointer to table
 // id - id of inserter item
 // types - data of inserter item
-// returns pointer to inserted item of NULL in case of malloc error
-IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
+// returns 0 in case of success
+//         1 in case of NULL param
+//         2 in case of malloc error
+//         3 when item with the same ID alredy exists
+int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 {
 	if (htptr == NULL || id == NULL || types == NULL)
-		return NULL;
+		return 1;
 	if (IAL_htSearch(htptr, id) != NULL)
-		return NULL;
+		return 3;
 
 	int hash = IAL_hashCode(id);
 	int idLength = strlen(id);
@@ -106,7 +109,7 @@ IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 		idLength + 1 //ID
 		);
 	if (itemptr == NULL)
-		return NULL;
+		return 2;
 
 	// Initialise item's values
 	itemptr->id = itemptr->types + typesNum + 1;
@@ -118,7 +121,7 @@ IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 
 	// Add item to list
 	(*htptr)[hash] = itemptr;
-	return itemptr;
+	return 0;
 }
 
 // Remove all the items and free memory allocated for items

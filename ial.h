@@ -3,6 +3,7 @@
 // (c) Antonín Vlach
 // V rámci projektu do předmětů IFJ a IAL
 
+
 #ifndef IAL_
 #define IAL_
 
@@ -50,8 +51,11 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id);
 // htptr - pointer to table
 // id - id of inserter item
 // types - data of inserter item
-// returns pointer to inserted item of NULL in case of malloc error
-IAL_htItem *IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
+// returns 0 in case of success
+//         1 in case of NULL param
+//         2 in case of malloc error
+//         3 when item with the same ID alredy exists
+int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
 
 // Remove all the items and free memory allocated for items
 void IAL_htDispose(IAL_HashTable *htptr);
