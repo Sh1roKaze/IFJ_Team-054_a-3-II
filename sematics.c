@@ -105,6 +105,137 @@ int sematics(tTNodePtr ptr){
       }
 }
 
+int function_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass){
+      tStackPtr *S;
+      char *name;
+      int error = 0;
+      char *types;
+      int i = 2;
+      patsHT_Item *item;
+      parsHT_Table *LHTable = malloc(sizeof(parsHT_Table));
+      parsHT_Init(LHTable);
+
+      SInit (S);
+      //FUNCTION
+      ptr = push_right_go_left (ptr, S);
+      //DECLARATION
+      ptr = ptr->RPtr;
+      //ID
+      name = ptr->literal;
+      name = add_class_before_name (ActClass, name, &error);
+      if (name == NULL){
+            DStack (S);
+            free (LHTable);      
+            return 99;       
+      }
+      item = parsHT_Search(HTable, name);
+      free(name);      
+      types = item->literal;
+      ptr = STopPop (S);
+      //FUNCTION 2
+      ptr = push_right_go_left (ptr, S);
+      //ARG_LIST
+      SPush (S, ptr);
+      while(SEmpty (S) != 1 && (STop(S))->item->key == ARG_LIST){ //Load params to typs
+            ptr = STopPop (S);
+            if (ptr->LPtr != NULL){
+                  ptr = push_right_go_left (ptr, S);
+                  //DECLARATION
+                  ptr = ptr->RPtr;
+                  //ID
+                  name = ptr->literal;
+                  if (parsHT_Search(LHTable, name) == NULL){
+                        parsHT_Insert(LHTable, name, &(typs[i]));
+                        i++;
+                  }
+                  else{
+                        DStack (S);
+                        parsHT_Dispose(LHTable);
+                        free (LHTable);
+                        return 3,      
+                  }                           
+            }
+      }
+      ptr = STopPop (S);
+      //ST_LIST
+            
+      if (ptr != NULL && ptr->key == ST_LIST){
+            error = st_list_control (ptr, HTable, LHTable, ActClass);
+            if (error != 0){
+                  DStack (S);
+                  parsHT_Dispose(LHTable);
+                  free(LHTable);
+                  return error;
+            }
+      }
+      
+      parsHT_Dispose(LHTable);
+      free(LHTable);
+      return 0;      
+}
+
+int st_list_control (tTNodePtr ptr, parsHT_Table *HTable, parsHT_Table *LHTable, char *ActClass){
+      tStackPtr *S;
+      char *name;
+      int error = 0;
+      char typ;
+
+      SInit (S);
+      SPush (S, ptr);
+      do{
+            ptr = STopPop (S);
+            //ST_LIST
+            if (ptr != NULL && ptr->key == ST_LIST)
+                  ptr = push_right_go_left (ptr, S); 
+            //LOCAL_VAR 
+            if (ptr != NULL && ptr->key == LOCAL_VAR){
+                  ptr = push_right_go_left (ptr, S);
+                  //DECLARATION
+                  ptr = push_right_go_left (ptr, S);
+                  //Type
+                  load_typ (ptr->key, &typ); //load typ of var {I,D,S} to typ
+                  if (typ == 'V'){
+                        free(typs)
+                        DStack (S);
+                        return 6;                  
+                  }
+                  ptr = STopPop (S);
+                  //ID
+                  name = ptr->literal;
+                  if (parsHT_Search(LHTable, name) == NULL){
+                        parsHT_Insert(LHTable, name, &typ);
+                  }
+                  else{
+                        DStack (S);
+                        return 3;      
+                  }
+            }
+            //STATEMENT
+            if (ptr != NULL && ptr->key == STATEMENT){
+                  ptr = ptr->LPtr;
+                  if (ptr->key == ASSIGNMENT){
+                        //TODO
+                  }
+                  if (ptr->key == CONDITION){
+                        //TODO
+                  }
+                  if (ptr->key == CYCLE){
+                        //TODO
+                  }
+                  if (ptr->key == CALL){
+                        //TODO
+                  }
+                  if (ptr->key == RETURN){
+                        //TODO
+                  }
+                  
+            }  
+
+      }while (SEmpty (S));
+            
+      return 0;
+}
+
 int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *returns){
       char *fullname;
       patsHT_Item *item;
