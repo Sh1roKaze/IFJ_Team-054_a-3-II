@@ -53,7 +53,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id);
 // types - data of inserter item
 // returns 0 in case of success
 //         1 in case of NULL param
-//         2 in case of malloc error
+//         99 in case of malloc error
 //         3 when item with the same ID alredy exists
 int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
 
