@@ -1,5 +1,5 @@
 // ial.h
-// 10. 11. 2016
+// 10. 11. - 21. 11. 2016
 // (c) Antonín Vlach
 // V rámci projektu do předmětů IFJ a IAL
 
@@ -16,37 +16,47 @@ int IFJ16_find(char *s, char *search);
 // Vrací 0 v případě úspěchu a nenulové číslo v případě chyby.
 int IFJ16_sort(char *in, char *out);
 
-// -------------------------Hashovací tabulka symbolů--------------------------------
+// -------------------------Hash table--------------------------------
 
-// Velikost tabulky
-#define IAL_HTSIZE 101
-
-// Klíč k položkám tabulky
-typedef char *IAL_htKey;
-
-// Struktura jedné položky tabulky
+// One item of table
 typedef struct IAL_htItem {
-	IAL_htKey key;
-	struct IAL_htItem *next;
+	char *id; // ID and key
+	struct IAL_htItem *next; // Next synonyms pointer
+	void *valptr; // Pointer to value of variable
+	int n; // length of types array
+	char types[];
+	// types[0] = V/F(variable/function)
+	// types[1] = V/I/D/S(void/int/double/string) type of variable or return type of function
+	// types[2..n-1] = I/D/S(int/double/string) parameters' types of function
 } IAL_htItem;
 
-// Datový typ tabulky
-typedef struct IAL_htItem *IAL_HTable[IAL_HTSIZE];
+// Hash table size
+#define IAL_HTSIZE 503
 
-// Funkce pracující s hashovací tabulkou:
+// Hash htable
+typedef IAL_htItem *IAL_HashTable[IAL_HTSIZE];
 
-// Inicializace již alokované tabulky - nutno provést před prvním použitím.
-void IAL_htInit(IAL_HTable *htptr);
+// Initialisation of empty values in hash table
+// htptr - must be alredy allocated
+void IAL_htInit(IAL_HashTable *htptr);
 
-// Vrátí ukazatel na položku s daným klíčem. Pokud položka v tabulce není, vrací NULL.
-IAL_htItem *IAL_htSearch(IAL_HTable *htptr, IAL_htKey key);
+// Search item with the same id and the same types
+// htptr - pointer to table
+// id - id to be search for
+// types - specific types combination ("types" value of item)
+// returns pointer to the found item or NULL
+IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id);
 
-// Přidá položku do tabulky.
-// Vrací ukazatel na vložený prvek nebo NULL v případě chyby
-IAL_htItem *IAL_htInsert(IAL_HTable *htptr, IAL_htKey key);
+// Insert item to table. Call the search
+// htptr - pointer to table
+// id - id of inserter item
+// types - data of inserter item
+// returns 0 in case of success
+//         1 in case of NULL param
+//         2 in case of malloc error
+//         3 when item with the same ID alredy exists
+int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
 
-// Odstraní a uvolní všechny prvky v tabulce. Neuvolňuje klíče - ty musí uvolnit, kdo je alokoval!
-void IAL_htDispose(IAL_HTable *htptr);
-
-
+// Remove all the items and free memory allocated for items
+void IAL_htDispose(IAL_HashTable *htptr);
 #endif // IAL_

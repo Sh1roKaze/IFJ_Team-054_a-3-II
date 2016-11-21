@@ -37,10 +37,10 @@ int IFJ16_sort(char *in, char *out)
 	return 0;
 }
 
-// Funkce pracující s hashovací tabulkou:
+// ---------------------------------- Hash table -------------------------------
 
 // Vygenerování hashkódu podle klíče
-int IAL_hashCode(IAL_htKey key)
+int IAL_hashCode(char *key)
 {
 	int hash = 0;
 	int l = strlen(key);
@@ -51,58 +51,88 @@ int IAL_hashCode(IAL_htKey key)
 	return hash % IAL_HTSIZE;
 }
 
-// Inicializace již alokované tabulky - nutno provést před prvním použitím.
-void IAL_htInit(IAL_HTable *htptr)
+// Initialisation of empty values in hash table
+// htptr - must be alredy allocated
+void IAL_htInit(IAL_HashTable *htptr)
 {
 	if (htptr == NULL)
-		return;	
+		return;
 
 	for (int i = 0; i < IAL_HTSIZE; i++)
 		(*htptr)[i] = NULL;
 }
 
-// Vrátí ukazatel na položku s daným klíčem. Pokud položka v tabulce není, vrací NULL.
-IAL_htItem *IAL_htSearch(IAL_HTable *htptr, IAL_htKey key)
+// Search item with the same id and the same types
+// htptr - pointer to table
+// id - id to be search for
+// types - specific types combination ("types" value of item)
+// returns pointer to the found item or NULL
+IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id)
 {
-	if (htptr == NULL || key == NULL)
+	if (htptr == NULL || id == NULL)
 		return NULL;
 
-	IAL_htItem *itemptr = (*htptr)[IAL_hashCode(key)];
+	IAL_htItem *itemptr = (*htptr)[IAL_hashCode(id)];
 
 	while (itemptr != NULL)
-		if (strcmp(key, itemptr->key))
+		if (strcmp(id, itemptr->id))
 			itemptr = itemptr->next;
 		else break;
 
 	return itemptr;
 }
 
-// Přidá položku do tabulky.
-// Vrací ukazatel na vložený prvek nebo NULL v případě chyby
-IAL_htItem *IAL_htInsert(IAL_HTable *htptr, IAL_htKey key)
+// Insert item to table. Call the search
+// htptr - pointer to table
+// id - id of inserter item
+// types - data of inserter item
+// returns 0 in case of success
+//         1 in case of NULL param
+//         2 in case of malloc error
+//         3 when item with the same ID alredy exists
+int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 {
-	if (htptr == NULL || key == NULL)
-		return NULL;
+	if (htptr == NULL || id == NULL || types == NULL)
+		return 1;
+	if (IAL_htSearch(htptr, id) != NULL)
+		return 3;
 
-	int hash = IAL_hashCode(key);
-	IAL_htItem *itemptr = malloc(sizeof(IAL_htItem));
+	int hash = IAL_hashCode(id);
+	int idLength = strlen(id);
+	int typesNum = strlen(types);
+	IAL_htItem *itemptr = malloc(
+		sizeof(char *) + //char *id
+		sizeof(IAL_htItem *) + //IAL_htItem *next
+		sizeof(void *) + //void *valptr
+		sizeof(int) + //int n
+		typesNum + 1 + //char types[]
+		idLength + 1 //ID
+		);
 	if (itemptr == NULL)
-		return NULL;
-	itemptr->key = key;
+		return 2;
+
+	// Initialise item's values
+	itemptr->id = itemptr->types + typesNum + 1;
+	strcpy(itemptr->id, id);
 	itemptr->next = (*htptr)[hash];
+	itemptr->valptr = NULL;
+	itemptr->n = typesNum;
+	strcpy(itemptr->types, types);
+
+	// Add item to list
 	(*htptr)[hash] = itemptr;
-	return itemptr;
+	return 0;
 }
 
-// Odstraní a uvolní všechny prvky v tabulce. Neuvolňuje klíče - ty musí uvolnit, kdo je alokoval!
-void IAL_htDispose(IAL_HTable *htptr)
+// Remove all the items and free memory allocated for items
+void IAL_htDispose(IAL_HashTable *htptr)
 {
 	if (htptr == NULL)
 		return;
 
 	IAL_htItem *itemptr;
 	for (int i = 0; i < IAL_HTSIZE; i++)
-		while (itemptr != NULL)
+		while ((*htptr)[i] != NULL)
 		{
 			itemptr = (*htptr)[i];
 			(*htptr)[i] = (*htptr)[i]->next;
