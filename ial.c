@@ -19,20 +19,28 @@ int IFJ16_find(char *s, char *search)
 	return -1; // TODO
 }
 
-// Seřadí znaky z řetězce in do řetězce out.
-// Řetězec out musí být alokován na stejnou velikost, jakou má řetězec in.
-// Vrací 0 v případě úspěchu a nenulové číslo v případě chyby.
+#define SWAP(a,b) do{(a)=(a)^(b);(b)=(a)^(b);(a)=(a)^(b);} while(0)
+
+// Sort characters from in to out by their char value using Shell Sort method
+// in - input string
+// out - output string - must be allocated with size at least strlen(in) + 1
+// Returns 0 in case of success
+//        -1 in case of NULL param
 int IFJ16_sort(char *in, char *out)
 {
 	if (in == NULL || out == NULL)
-		return -1; // TODO
+		return -1;
 
 	int l = strlen(in);
 
 	for (int i = 0; i <= l; i++)
-		out[i] = in[i]; // TODO
+		out[i] = in[i];
+	out[l] = '\0';
 
-	// TODO
+	for (int step = l / 2; step > 0; step /= 2)
+		for (int i = step; i < l; i++)
+			for (int j = i - step; j >= 0 && out[j] > out[j+step]; j -= step)
+				SWAP(out[j],out[j+step]);
 
 	return 0;
 }
@@ -88,7 +96,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id)
 // types - data of inserter item
 // returns 0 in case of success
 //         1 in case of NULL param
-//         99 in case of malloc error
+//         2 in case of malloc error
 //         3 when item with the same ID alredy exists
 int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 {
@@ -109,7 +117,7 @@ int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 		idLength + 1 //ID
 		);
 	if (itemptr == NULL)
-		return 99;
+		return 2;
 
 	// Initialise item's values
 	itemptr->id = itemptr->types + typesNum + 1;

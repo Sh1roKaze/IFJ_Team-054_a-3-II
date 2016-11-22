@@ -11,9 +11,11 @@
 // V řípadě neúspěchu vrací -1.
 int IFJ16_find(char *s, char *search);
 
-// Seřadí znaky z řetězce in do řetězce out.
-// Řetězec out musí být alokován na stejnou velikost, jakou má řetězec in.
-// Vrací 0 v případě úspěchu a nenulové číslo v případě chyby.
+// Sort characters from in to out by their char value using Shell Sort method
+// in - input string
+// out - output string - must be allocated with size at least strlen(in) + 1
+// Returns 0 in case of success
+//        -1 in case of NULL param
 int IFJ16_sort(char *in, char *out);
 
 // -------------------------Hash table--------------------------------
@@ -53,7 +55,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id);
 // types - data of inserter item
 // returns 0 in case of success
 //         1 in case of NULL param
-//         99 in case of malloc error
+//         2 in case of malloc error
 //         3 when item with the same ID alredy exists
 int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
 
