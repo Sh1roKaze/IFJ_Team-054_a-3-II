@@ -1,3 +1,8 @@
+// stack.c
+// 20. 11. 2016
+// (c) Jan Oškera
+// V rámci projektu do předmětů IFJ a IAL
+
 #include "stack.h"
 
 //extern variable detect malloc error
@@ -41,7 +46,10 @@ tItemStack STopPop (tStackPtr *S)
 
 //read top
 tItemStack STop (tStackPtr *S){
-      return (*S)->item;
+      if (SEmpty (S) != 1)
+            return (*S)->item;
+      else
+            return NULL;
 }
 
 //check if empty

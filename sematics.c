@@ -1,27 +1,47 @@
+// sematic.c
+// 20. 11. 2016
+// (c) Jan Oškera
+// V rámci projektu do předmětů IFJ a IAL
+
 #include "sematics.h"
 
 int DetectStackError;
+
+//Prototypes
+int subtree_int_to_real(tTNodePtr* ptr);
+int sematics(tTNodePtr ptr, IAL_HashTable *Table);
+int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass);
+int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes);
+int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes);
+int block_list_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes);
+int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *returns);
+int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char typ);
+void load_typ_literal (node_t key, char *typ);
+int load_inner (IAL_HashTable *HTable);
+int load_inner_function (IAL_HashTable *HTable, char *id, char *t);
+int load_static (tTNodePtr ptr, IAL_HashTable *HTable);
+int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, IAL_HashTable *HTable);
+int static_var_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, IAL_HashTable *HTable);
+char* add_class_before_name (char *class, char *name, int *error);
+void load_typ (node_t key, char *typ);
+char* add_typ_before_types (char typ, char *typs);
+char *add_char_behind_types (char *typs, char c);
 
 //build structure for call function int to real, repleace int in tree
 int subtree_int_to_real(tTNodePtr* ptr){
       tTNodePtr id_f = malloc (struct tTNode);
       tTNodePtr par_list = malloc (struct tTNode);
-      tTNodePtr param = malloc (struct tTNode);
       tTNodePtr id_p = malloc (struct tTNode);
       
-      if (id_f != NULL && par_list != NULL && param != NULL && id_p != NULL){        
+      if (id_f != NULL && par_list != NULL && id_p != NULL){        
             id_f->LPtr = NULL;
             id_f->RPtr = NULL;
             id_f->key = IDENTIFIER;
-            id_f->literal = "IntToReal";
+            id_f->literal = "ifj16.IntToReal";
             
-            par_list->LPtr = param;
+            par_list->LPtr = id_p;
             par_list->RPtr = NULL;
             par_list->key = PAR_LIST;
-                  
-            param->LPtr = id_p;
-            param->RPtr = NULL;
-            param->key = PAR_LIST;
 
             id_p->LPtr = (*ptr)->LPtr;
             id_p->RPtr = (*ptr)->RPtr;
@@ -37,7 +57,6 @@ int subtree_int_to_real(tTNodePtr* ptr){
       else{
             free(id_f);
             free(par_list);
-            free(param);
             free(id_p);
             return(99);
       }
@@ -45,75 +64,94 @@ int subtree_int_to_real(tTNodePtr* ptr){
       return 0;
 }
 
-int sematics(tTNodePtr ptr){
+int sematics(tTNodePtr ptr, IAL_HashTable *Table){
       tStackPtr *S;      
       char *ActClass = NULL;
       char typ;
       int error = 0;
 
-      parsHT_Table *SHTable = malloc(sizeof(parsHT_Table));  //check if tonda want this    
-      if (SHTable == NULL)
-            return 99;
-      
-      parsHT_Init(SHTable);
+      IAL_HashTable *SHTable;    
+
+      IAL_htInit(SHTable);      
+      error = load_inner (SHTable);
+      if (error != 0){
+            IAL_htDispose(SHTable);
+            free(SHTable);
+            return error;                  
+      }
+
       error = load_static (ptr, SHTable);
       if (error != 0){
-            parsHT_Dispose(SHTable);
+            IAL_htDispose(SHTable);
             free(SHTable);
             return error;                  
       }
       
       SInit (S);
-      //CLASS_LIST
-      if (ptr != NULL && ptr->key == CLASS_LIST){
-            ptr = push_right_go_left (ptr, S);
-      }
-      //CLASS
-      if (ptr != NULL && ptr->key == CLASS){
-            ptr = push_right_go_left (ptr, S);
-            ActClass = ptr->literal;
-            continue;
-            //ptr = STopPop (S);            
-      }
-      //CLASS_ITEM
-      if (ptr != NULL && ptr->key == CLASS_ITEM){
-            if (ptr->LPtr != NULL)
-                  ptr = push_right_go_left (ptr, S);  
-      }
-      //STATIC_VAR
-      if (ptr != NULL && ptr->key == STATIC_VAR){
-            ptr = push_right_go_left (ptr, S);
-            //DECLARATION
-            ptr = ptr->LPtr;
-            //TYP
-            load_typ (ptr->key, &typ);
-            if ( (STop(S))->item->key == EXPRESSION ){
-                  ptr = STopPop (S);
-                  //EXPRESSION
-                  error = expression_control(ptr, SHTable, ActClass, typ); 
+      SPush (S, ptr);
+      do{
+            ptr = STopPop (S);
+            //CLASS_LIST
+            if (ptr != NULL && ptr->key == CLASS_LIST){
+                  ptr = push_right_go_left (ptr, S);
+            }
+            //CLASS
+            if (ptr != NULL && ptr->key == CLASS){
+                  ptr = push_right_go_left (ptr, S);
+                  ActClass = ptr->literal;
+                  continue;
+                  //ptr = STopPop (S);            
+            }
+            //CLASS_ITEM
+            if (ptr != NULL && ptr->key == CLASS_ITEM){
+                  if (ptr->LPtr != NULL)
+                        ptr = push_right_go_left (ptr, S);  
+            }
+            //STATIC_VAR
+            if (ptr != NULL && ptr->key == STATIC_VAR){
+                  ptr = push_right_go_left (ptr, S);
+                  //DECLARATION
+                  ptr = ptr->LPtr;
+                  //TYP
+                  load_typ (ptr->key, &typ);
+                  if ( (STop(S))->key == EXPRESSION ){
+                        ptr = STopPop (S);
+                        //EXPRESSION
+                        error = expression_control(ptr, SHTable, NULL, ActClass, typ); 
+                        if (error != 0){
+                              DStack (S);
+                              IAL_htDispose(SHTable);
+                              free(SHTable);
+                              return error;                        
+                        }     
+                  }
+            }
+            //FUNCTION
+            if (ptr != NULL && ptr->key == FUNCTION){
+                  error = function_control(ptr, SHTable, ActClass);
                   if (error != 0){
                         DStack (S);
-                        parsHT_Dispose(SHTable);
+                        IAL_htDispose(SHTable);
                         free(SHTable);
                         return error;                        
-                  }     
+                  }  
             }
-      }
-      //FUNCTION
-      if (ptr != NULL && ptr->key == FUNCTION){
-      //TODO
-      }
+
+      }while (SEmpty (S));
+      
+      *Table = *SHTable;
+      return 0;
 }
 
-int function_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass){
+int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass){
       tStackPtr *S;
       char *name;
       int error = 0;
       char *types;
       int i = 2;
-      patsHT_Item *item;
-      parsHT_Table *LHTable = malloc(sizeof(parsHT_Table));
-      parsHT_Init(LHTable);
+      IAL_htItem *item;
+      IAL_HashTable *LHTable;
+      IAL_htInit(LHTable);
 
       SInit (S);
       //FUNCTION
@@ -128,15 +166,15 @@ int function_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass){
             free (LHTable);      
             return 99;       
       }
-      item = parsHT_Search(HTable, name);
+      item = IAL_htSearch(HTable, name);
       free(name);      
-      types = item->literal;
+      types = item->types;
       ptr = STopPop (S);
       //FUNCTION 2
       ptr = push_right_go_left (ptr, S);
       //ARG_LIST
       SPush (S, ptr);
-      while(SEmpty (S) != 1 && (STop(S))->item->key == ARG_LIST){ //Load params to typs
+      while(SEmpty (S) != 1 && (STop(S))->key == ARG_LIST){ //Load params to typs
             ptr = STopPop (S);
             if (ptr->LPtr != NULL){
                   ptr = push_right_go_left (ptr, S);
@@ -144,41 +182,50 @@ int function_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass){
                   ptr = ptr->RPtr;
                   //ID
                   name = ptr->literal;
-                  if (parsHT_Search(LHTable, name) == NULL){
-                        parsHT_Insert(LHTable, name, &(typs[i]));
+                  if (IAL_htSearch(LHTable, name) == NULL){
+                        error = IAL_htInsert(LHTable, name, &(types[i]));
+                        if (error != 0){
+                              DStack (S);
+                              IAL_htDispose(LHTable);
+                              free (LHTable);
+                              return 99;
+                        }
                         i++;
                   }
                   else{
                         DStack (S);
-                        parsHT_Dispose(LHTable);
+                        IAL_htDispose(LHTable);
                         free (LHTable);
                         return 3,      
                   }                           
             }
       }
       ptr = STopPop (S);
-      //ST_LIST
-            
+
+      //ST_LIST       
       if (ptr != NULL && ptr->key == ST_LIST){
-            error = st_list_control (ptr, HTable, LHTable, ActClass);
+            error = st_list_control (ptr, HTable, LHTable, ActClass, types);
             if (error != 0){
                   DStack (S);
-                  parsHT_Dispose(LHTable);
+                  IAL_htDispose(LHTable);
                   free(LHTable);
                   return error;
             }
       }
       
-      parsHT_Dispose(LHTable);
+      IAL_htDispose(LHTable);
       free(LHTable);
       return 0;      
 }
 
-int st_list_control (tTNodePtr ptr, parsHT_Table *HTable, parsHT_Table *LHTable, char *ActClass){
+int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes){
       tStackPtr *S;
       char *name;
+      char *fullname;
       int error = 0;
       char typ;
+      char *typs;
+      IAL_htItem *item;
 
       SInit (S);
       SPush (S, ptr);
@@ -195,38 +242,37 @@ int st_list_control (tTNodePtr ptr, parsHT_Table *HTable, parsHT_Table *LHTable,
                   //Type
                   load_typ (ptr->key, &typ); //load typ of var {I,D,S} to typ
                   if (typ == 'V'){
-                        free(typs)
                         DStack (S);
                         return 6;                  
+                  }
+                  typs = add_typ_before_types ('P', &typ);
+                  if (typs == NULL){
+                        DStack (S);      
+                        return 99;
                   }
                   ptr = STopPop (S);
                   //ID
                   name = ptr->literal;
-                  if (parsHT_Search(LHTable, name) == NULL){
-                        parsHT_Insert(LHTable, name, &typ);
+                  if (IAL_htSearch(LHTable, name) == NULL){
+                        error = IAL_htInsert(LHTable, name, typs);
+                        free(typs);
+                        if (error != 0){
+                              DStack (S);
+                              return 99;
+                        }
                   }
                   else{
+                        free(typs);
                         DStack (S);
                         return 3;      
                   }
             }
             //STATEMENT
             if (ptr != NULL && ptr->key == STATEMENT){
-                  ptr = ptr->LPtr;
-                  if (ptr->key == ASSIGNMENT){
-                        //TODO
-                  }
-                  if (ptr->key == CONDITION){
-                        //TODO
-                  }
-                  if (ptr->key == CYCLE){
-                        //TODO
-                  }
-                  if (ptr->key == CALL){
-                        //TODO
-                  }
-                  if (ptr->key == RETURN){
-                        //TODO
+                  error = statement_control(ptr, HTable, LHTable, ActClass, ftypes);
+                  if (error != 0){
+                        DStack (S);
+                        return error;
                   }
                   
             }  
@@ -236,9 +282,182 @@ int st_list_control (tTNodePtr ptr, parsHT_Table *HTable, parsHT_Table *LHTable,
       return 0;
 }
 
-int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *returns){
+int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes){
+      tStackPtr *S;
+      char *name;
       char *fullname;
-      patsHT_Item *item;
+      int error = 0;
+      char typ;
+      char returns;
+      IAL_htItem *item;
+
+      SInit (S);
+
+      //STATEMENT
+      ptr = ptr->LPtr;
+      //ASSIGNMENT
+      if (ptr->key == ASSIGNMENT){
+            ptr = push_right_go_left (ptr, S);
+            //ID
+            name = ptr->literal;
+            //Try find variable
+            if (LHTable != NULL)//Try find local
+                  item = IAL_htSearch(LHTable, name);
+            else 
+                  item = NULL;
+                  
+            if (item == NULL){//Try find global
+                  item = IAL_htSearch(HTable, name);
+                  if (item == NULL){
+                        fullname = add_class_before_name (ActClass, name, &error);
+                        if (error != 0){                              
+                              DStack (S);   
+                              return error;
+                        }                        
+                        item = IAL_htSearch(HTable, fullname);
+                        if (item == NULL){
+                              DStack (S);
+                              free(fullname);                     
+                              return 3;  
+                        }    
+                        free(fullname); 
+                  }
+            }
+
+            typ = item->types[1];
+            ptr = STopPop (S);
+            //EXPRESSION
+            error = expression_control(ptr, HTable, LHTable, ActClass, typ);
+            if (error != 0){
+                  DStack (S);      
+                  return error;      
+            }
+      }
+
+      //CONDITION
+      if (ptr->key == CONDITION){
+            ptr = push_right_go_left (ptr, S);
+            //COMPARISON
+            ptr = push_right_go_left (ptr, S);
+            //EXPRESSION
+            if (ptr != NULL){
+                  error = expression_control(ptr, HTable, LHTable, ActClass, 'D');
+                  if (error != 0){
+                        DStack (S);
+                        return error;
+                  }            
+            }
+            if (STop (S)->key == EXPRESSION){
+                  ptr = STopPop (S);
+                  //EXPRESSION
+                  error = expression_control(ptr, HTable, LHTable, ActClass, 'D');
+                  if (error != 0){
+                        DStack (S);
+                        return error;
+                  } 
+            }
+            ptr = STopPop (S);
+            //CONDITION 2
+            if (ptr->LPtr != NULL){
+                  //BLOCK_LIST
+                  error = block_list_control(ptr->LPtr, HTable, LHTable, ActClass, ftypes);
+                  if (error != 0){
+                        DStack (S);
+                        return error;
+                  }      
+      
+                  //BLOCK_LIST
+                  if (ptr->RPtr != NULL){
+                        error = block_list_control(ptr->RPtr, HTable, LHTable, ActClass, ftypes);
+                        if (error != 0){
+                              DStack (S);
+                              return error;
+                        }
+                  }
+            }       
+      }
+      //CYCLE
+      if (ptr->key == CYCLE){
+            ptr = push_right_go_left (ptr, S);
+            //COMPARISON
+            ptr = push_right_go_left (ptr, S);
+            //EXPRESSION
+            if (ptr != NULL){
+                  error = expression_control(ptr, HTable, LHTable, ActClass, 'D');
+                  if (error != 0){
+                        DStack (S);
+                        return error;
+                  }      
+            }
+            if (STop (S)->key == EXPRESSION){
+                  ptr = STopPop (S);
+                  //EXPRESSION
+                  error = expression_control(ptr, HTable, LHTable, ActClass, 'D');
+                  if (error != 0){
+                        DStack (S);
+                        return error;
+                  } 
+            }
+            ptr = STopPop (S);
+            //BLOCK_LIST
+            error = block_list_control(ptr, HTable, LHTable, ActClass, ftypes);
+            if (error != 0){
+                  DStack (S);
+                  return error;
+            }
+      }
+
+      //CALL
+      if (ptr->key == CALL){
+            error = call_control(ptr, HTable, LHTable, ActClass, &returns);
+            if (error != 0){
+                  DStack (S);      
+                  return error;      
+            }
+      }
+
+      //RETURN
+      if (ptr->key == RETURN){
+            ptr = ptr->LPtr;
+            if (ptr != NULL){
+                  error = expression_control(ptr, HTable, LHTable, ActClass, ftypes[1]);
+                  if (error != 0){
+                        DStack (S);      
+                        return error;      
+                  }         
+            }
+      } 
+      return 0;               
+}
+
+int block_list_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *ftypes){
+      tStackPtr *S;
+      int error = 0;
+
+      SInit (S);
+      SPush (S, ptr);
+
+      do{
+            ptr = STopPop (S);
+            //BLOCK_LIST
+            ptr = push_right_go_left (ptr, S);
+            //STATEMENT
+            if (ptr != NULL){
+                  error = statement_control(ptr, HTable, LHTable, ActClass, ftypes);
+                  if (error != 0){
+                        DStack (S);      
+                        return error;      
+                  }      
+            }
+            
+      }while(SEmpty (S));
+
+      return 0;
+}
+
+int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char *returns) {
+      char *fullname;
+      IAL_htItem *item;
       char *ftypes;      
       char *name;
       char typ;
@@ -253,14 +472,14 @@ int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *retu
       name = ptr->literal;
 
       //Try find function
-      item = parsHT_Search(HTable, name);
+      item = IAL_htSearch(HTable, name);
       if (item == NULL){
             fullname = add_class_before_name (ActClass, name, &error);
             if (error != 0){                              
                   DStack (S);                  
                   return error;                  
             }                        
-            item = parsHT_Search(HTable, fullname);
+            item = IAL_htSearch(HTable, fullname);
             if (item == NULL){
                   free(fullname);
                   DStack (S);                     
@@ -285,20 +504,27 @@ int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *retu
             if (ptr != NULL && ptr->key == ID){
                   name = ptr->literal;
                   //Try find variable
-                  item = parsHT_Search(HTable, name);
-                  if (item == NULL){
-                        fullname = add_class_before_name (ActClass, name, &error);
-                        if (error != 0){                              
-                              DStack (S);   
-                              return error;
-                        }                        
-                        item = parsHT_Search(HTable, fullname);
+                  if (LHTable != NULL)//Try find local
+                        item = IAL_htSearch(LHTable, name);
+                  else
+                        item = NULL;
+                  
+                  if (item == NULL){//Try find global
+                        item = IAL_htSearch(HTable, name);
                         if (item == NULL){
-                              DStack (S);
-                              free(fullname);                     
-                              return 3;  
-                        }    
-                  free(fullname); 
+                              fullname = add_class_before_name (ActClass, name, &error);
+                              if (error != 0){                              
+                                    DStack (S);   
+                                    return error;
+                              }                        
+                              item = IAL_htSearch(HTable, fullname);
+                              if (item == NULL){
+                                    DStack (S);
+                                    free(fullname);                     
+                                    return 3;  
+                              }    
+                        free(fullname); 
+                        }
                   }
                   
                   if ( (item->types)[0] != 'P'){
@@ -317,7 +543,7 @@ int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *retu
 
             //EXPRESSION
             if (ptr != NULL && ptr->key == EXPRESSION){
-                  error = expression_control(ptr, HTable, ActClass, ftypes[i]);
+                  error = expression_control(ptr, HTable, LHTable, ActClass, ftypes[i]);
                   if (error != 0){
                         DStack (S);                        
                         return error;
@@ -334,15 +560,13 @@ int call_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char *retu
       return 0;
 }
 
-
-
-int expression_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char typ){
+int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *ActClass, char typ){
       tStackPtr *S; 
       int error = 0;
       char returns;
       char *name;
       char *fullname;
-      patsHT_Item *item;
+      IAL_htItem *item;
       char tvar; 
       
       SInit (S);
@@ -362,20 +586,27 @@ int expression_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char
             if (ptr != NULL && ptr->key == ID){
                   name = ptr->literal;
                   //Try find variable
-                  item = parsHT_Search(HTable, name);
-                  if (item == NULL){
-                        fullname = add_class_before_name (ActClass, name, &error);
-                        if (error != 0){                              
-                              DStack (S);                        
-                              return error;
-                        }                        
-                        item = parsHT_Search(HTable, fullname);
+                  if (LHTable != NULL)//Try find local
+                        item = IAL_htSearch(LHTable, name);
+                  else
+                        item = NULL;
+                  
+                  if (item == NULL){//Try find global
+                        item = IAL_htSearch(HTable, name);
                         if (item == NULL){
-                              DStack (S);
-                              free(fullname);                              
-                              return 3;                                    
-                        }                  
-                        free(fullname);                  
+                              fullname = add_class_before_name (ActClass, name, &error);
+                              if (error != 0){                              
+                                    DStack (S);                        
+                                    return error;
+                              }                        
+                              item = IAL_htSearch(HTable, fullname);
+                              if (item == NULL){
+                                    DStack (S);
+                                    free(fullname);                              
+                                    return 3;                                    
+                              }                  
+                              free(fullname);                  
+                        }
                   }
                   
                   if ( (item->types)[0] != 'P'){
@@ -418,7 +649,7 @@ int expression_control(tTNodePtr ptr, parsHT_Table *HTable, char *ActClass, char
             
             //CALL
             if (ptr != NULL && ptr->key == CALL){
-                  call_control(ptr, HTable, ActClass, &returns);
+                  call_control(ptr, HTable, LHTable, ActClass, &returns);
                   //Check return typ of function                  
                   if (returns != typ){
                         if (typ == 'D' && returns == 'I'){
@@ -450,7 +681,65 @@ void load_typ_literal (node_t key, char *typ){
                   *typ = 'D';                                     
 }
 
-int load_static (tTNodePtr ptr, parsHT_Table *HTable){      
+int load_inner (IAL_HashTable *HTable){
+      int error = 0;
+
+      error = load_inner_function (HTable, "IFJ16.readInt", "FII");
+      if (error != 0)
+            return 99;       
+      error = load_inner_function (HTable, "IFJ16.readDouble", "FID");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.readString", "FIS");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.printInt", "FVI");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.printDouble", "FVD");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.printString", "FVS");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.length", "FIS");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.substr", "FISIIS");
+      if (error != 0)
+            return 99;
+      error = load_inner_function (HTable, "IFJ16.compare", "FISS");
+      if (error != 0)
+            return 99;
+
+      return 0;
+}
+
+int load_inner_function (IAL_HashTable *HTable, char *id, char *t){
+      char *name;
+      char *types;
+      size_t size;
+      int error = 0;
+
+      size = strlen (id) + 1;
+      name = malloc(size); 
+      name = strcpy(name, id);
+      
+      size = strlen (t) + 1;
+      types = malloc(size);
+      types = strcpy(types, t);
+
+      error = IAL_htInsert(HTable, name, types);
+      free(name);
+      free(types);
+      
+      if (error != 0)
+            return error;
+      else
+            return 0;
+}
+
+int load_static (tTNodePtr ptr, IAL_HashTable *HTable){      
       tStackPtr *S;
       char *ActClass = NULL;
       int error = 0;
@@ -497,7 +786,7 @@ int load_static (tTNodePtr ptr, parsHT_Table *HTable){
       return 0;     
 }      
 
-int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_Table *HTable){
+int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, IAL_HashTable *HTable){
       char typ = '';
       char *typs = NULL;
       char *name = NULL; 
@@ -528,7 +817,7 @@ int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_
       ptr = ptr->LPtr;
       //ARG_LIST
       SPush (S, ptr);
-      while(SEmpty (S) != 1 && (STop(S))->item->key == ARG_LIST){ //Load params to typs
+      while(SEmpty (S) != 1 && (STop(S))->key == ARG_LIST){ //Load params to typs
             ptr = STopPop (S);
             if (ptr->LPtr != NULL){
                   ptr = push_right_go_left (ptr, S);
@@ -546,10 +835,14 @@ int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_
                   typs = help;           
             }
       }
-      if (parsHT_Search(HTable, name) == NULL){
-            parsHT_Insert(HTable, name, typs);
+      if (IAL_htSearch(HTable, name) == NULL){
+            error = IAL_htInsert(HTable, name, typs);
             free(name);
-            free(typs);           
+            free(typs);
+            if (error != 0){
+                  DStack (S);
+                  return 99;
+            }           
       }
       else{
             free(name);
@@ -563,7 +856,7 @@ int function_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_
          
 }
 
-int static_var_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsHT_Table *HTable){
+int static_var_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, IAL_HashTable *HTable){
       char typ = '';
       char *typs = NULL;
       char *name = NULL;    
@@ -596,11 +889,15 @@ int static_var_htinsert(tTNodePtr *original, tStackPtr *S, char *ActClass, parsH
             DStack (S);      
             return (error == 99) ? 99 : 6;       
       }
-      if (parsHT_Search(HTable, name) == NULL){
-            parsHT_Insert(HTable, name, typs);
+      if (IAL_htSearch(HTable, name) == NULL){
+            error = IAL_htInsert(HTable, name, typs);
             free(name);
             free(typs);           
+            if (error != 0){
+                  DStack (S);
+                  return 99;
             }
+      }
       else{
             free(name);
             free(typs);

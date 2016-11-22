@@ -1,3 +1,8 @@
+// stack.h
+// 20. 11. 2016
+// (c) Jan Oškera
+// V rámci projektu do předmětů IFJ a IAL
+
 //type for item in stack struct
 typedef tTNodePtr tItemStack;
 
