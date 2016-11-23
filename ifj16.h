@@ -8,14 +8,23 @@
 #ifndef IFJ16_
 #define IFJ16_
 
-// Přečte celé číslo ze vstupu a to uloží na místo, kam ukazuje parametr.
-// Vrací nulu v případě neúspěchu a nenulové celé číslo při neúspěchu.
+// Read integer from standard input
+// iptr - output parameter, input value will be given here
+// returns 0 in case of success
+//         7 in case of incorrect input
 int IFJ16_readInt(int *);
 
-// Přečte desetinné číslo ze standardního vstupu podobně, jako u celého čísla.
+// Read real number from standard input
+// dptr - output parameter, input value will be given here
+// returns 0 in case of success
+//         7 in case of incorrect input
 int IFJ16_readDouble(double *);
 
-// Přečte řetězec ze vstupu a alokuje pro něj novou paměť - nutno nakonec uvolnit!!!
+// Read string ended by EOF or \n from standard input
+// sptr - pointer to string to be read 
+// ATTENTION!!! this function use malloc for *sptr don't forget to free the memory !!!
+// returns 0 in case of success
+//        99 in case of malloc error
 int IFJ16_readString(char **);
 
 // Print integer to standard output
@@ -40,7 +49,7 @@ int IFJ16_length(char *);
 // out - output string - must be allocated at least for n+1 (ending \0 char)!!!
 // Returns 0 in case of succes
 //         1 in case of NULL params
-//         2 if substring is out of inputs range
+//         10 if substring is out of inputs range
 int IFJ16_substr(char *in, unsigned i, unsigned n, char *out);
 
 // Compare tvo strings (s1, s2)

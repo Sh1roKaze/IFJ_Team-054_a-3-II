@@ -193,14 +193,14 @@ int IFJ16_length(char *s)
 // out - output string - must be allocated at least for n+1 (ending \0 char)!!!
 // Returns 0 in case of succes
 //         1 in case of NULL params
-//         2 if substring is out of inputs range
+//         10 if substring is out of inputs range
 int IFJ16_substr(char *in, unsigned i, unsigned n, char *out)
 {
 	out[0] = '\0';
 	if (in == NULL || out == NULL)
 		return 1;
 	if (strlen(in) < i + n)
-		return 2;
+		return 10;
 
 	strncpy(out, in + i, n);
 	out[n] = '\0';
