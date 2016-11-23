@@ -7,8 +7,13 @@
 #ifndef IAL_
 #define IAL_
 
-// Najde řetězec search uvnitř řetězce s a vrátí jeho pozici.
-// V řípadě neúspěchu vrací -1.
+// Find first occur. of the search string in s string
+// s - string to be searched in
+// search - string to be searched for
+// return index of the firs foun search string
+//        0 when search string is empty
+//        -1 when no search string is found in s
+//        -99 when malloc error
 int IFJ16_find(char *s, char *search);
 
 // Sort characters from in to out by their char value using Shell Sort method

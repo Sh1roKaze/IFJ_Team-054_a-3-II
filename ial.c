@@ -7,16 +7,51 @@
 #include <string.h>
 #include <stdlib.h>
 
-// Najde řetězec search uvnitř řetězce s a vrátí jeho pozici.
-// V řípadě neúspěchu vrací -1.
+// Find first occur. of the search string in s string
+// s - string to be searched in
+// search - string to be searched for
+// return index of the firs foun search string
+//        0 when search string is empty
+//        -1 when no search string is found in s
+//        -99 when malloc error
 int IFJ16_find(char *s, char *search)
 {
-	if (s == NULL || search == NULL)
+	int l1 = strlen(s);
+	int l2 = strlen(search);
+	if (l2 == 0)
+		return 0;
+
+	int *fail = malloc(l2 * sizeof(int));
+	if (fail == NULL)
+		return -99;
+
+	fail[0] = -1;
+	int r;
+	for (int i = 1; i < l2; i++)
+	{
+		r = fail[i-1];
+		while (r >= 0 && search[r] != search[i-1])
+			r = fail[r];
+		fail[i] = r+1;
+	}
+
+	int i1 = 0;
+	int i2 = 0;
+	while (i1 < l1 && i2 < l2)
+		if (i2 == -1 || s[i1] == search[i2])
+		{
+			i1++;
+			i2++;
+		}
+		else
+			i2 = fail[i2];
+
+	free(fail);
+
+	if (i2 == l2)
+		return i1-l2;
+	else
 		return -1;
-
-	// TODO
-
-	return -1; // TODO
 }
 
 #define SWAP(a,b) do{(a)=(a)^(b);(b)=(a)^(b);(a)=(a)^(b);} while(0)
