@@ -68,8 +68,14 @@ void divisionOperatorHelpingFunction()
     currentState = &ignoreLine;
   else if (currentCharacter == '*')
     currentState = &ignoreBlock;
-  else
-    printErrorMessageAndExit("ivalid keyword specification", 1);
+  else //if (currentCharacterMatchWhitespace() || currentCharacterMatchOperatorTokenType() != -1 || currentCharacterMatchRange('0', '9'))
+    {
+      transferedCharacter = currentCharacter;
+      endCurrentToken(currentDatalessTokenType);
+      return;
+    }
+  //else
+    //printErrorMessageAndExit("ivalid keyword specification", 1);
 
   mainBuffer->position--;
   return;
