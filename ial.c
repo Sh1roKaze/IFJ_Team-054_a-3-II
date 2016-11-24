@@ -133,7 +133,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id)
 //         1 in case of NULL param
 //         2 in case of malloc error
 //         3 when item with the same ID alredy exists
-int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
+int IAL_htInsert(IAL_HashTable *htptr, char *id, int index, char *types)
 {
 	if (htptr == NULL || id == NULL || types == NULL)
 		return 1;
@@ -148,6 +148,7 @@ int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 		sizeof(IAL_htItem *) + //IAL_htItem *next
 		sizeof(void *) + //void *valptr
 		sizeof(int) + //int n
+		sizeof(int) + //int index
 		typesNum + 1 + //char types[]
 		idLength + 1 //ID
 		);
@@ -160,6 +161,7 @@ int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types)
 	itemptr->next = (*htptr)[hash];
 	itemptr->valptr = NULL;
 	itemptr->n = typesNum;
+	itemptr->index = index;
 	strcpy(itemptr->types, types);
 
 	// Add item to list
