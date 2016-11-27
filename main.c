@@ -27,6 +27,5 @@ int main(){
       }
  
       freeTree(&derivationTree);
-      printf("return: %d\n", ret);
       return ret;
 }
