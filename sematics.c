@@ -637,13 +637,15 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       do{
             printf("expression\n");
             ptr = STopPop (S);
+            printf("!!!uzel: %s\n",getNodeString(ptr->key));
             //EXPRESSION  
-            if (ptr != NULL && ptr->key == EXPRESSION)          
-                  ptr = push_right_go_left (ptr, S);
-
-            //EXPRESSION 2 
-            if (ptr != NULL && ptr->key == EXPRESSION)          
-                  ptr = push_right_go_left (ptr, S);
+            if (ptr != NULL){
+                  while (ptr->key == EXPRESSION){          
+                        ptr = push_right_go_left (ptr, S);
+                        printf("uzel: %s\n",getNodeString(ptr->key));
+                  }           
+             }
+         
             
             //TERM
             if (ptr != NULL && ptr->key == TERM)          
