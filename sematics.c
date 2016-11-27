@@ -72,8 +72,6 @@ int sematics(tTNodePtr ptr, IAL_HashTable **Table){
       char typ;
       int error = 0;
 
-      printf("sematics\n");
-
       if (ptr == NULL){
             return 0;      
             *Table = NULL;
@@ -107,9 +105,7 @@ int sematics(tTNodePtr ptr, IAL_HashTable **Table){
             if (ptr != NULL && ptr->key == CLASS){
                   ptr = push_right_go_left (ptr, S);
                   ActClass = ptr->literal;
-                  printf("actclass = %s\n", ActClass);
-                  continue;
-                  //ptr = STopPop (S);            
+                  continue;          
             }
             //CLASS_ITEM
             if (ptr != NULL && ptr->key == CLASS_ITEM){
@@ -118,7 +114,6 @@ int sematics(tTNodePtr ptr, IAL_HashTable **Table){
             }
             //STATIC_VAR
             if (ptr != NULL && ptr->key == STATIC_VAR){
-                  printf("sematic-staticvar\n");
                   ptr = push_right_go_left (ptr, S);
                   //DECLARATION
                   ptr = ptr->LPtr;
@@ -127,7 +122,6 @@ int sematics(tTNodePtr ptr, IAL_HashTable **Table){
                   if ( SEmpty (S) != 1 && STop(S)->key == EXPRESSION ){
                         ptr = STopPop (S);
                         //EXPRESSION
-                        printf("sematic-staticvar-expresion\n");
                         error = expression_control(ptr, SHTable, NULL, ActClass, typ); 
                         if (error != 0){
                               DStack (S);
@@ -164,7 +158,6 @@ int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass){
       IAL_HashTable *LHTable = &Table;
       IAL_htInit(LHTable);
 
-      printf("function_control\n");
       SInit (S);
       //FUNCTION
       ptr = push_right_go_left (ptr, S);
@@ -188,14 +181,10 @@ int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass){
       SPush (S, ptr);
       while(SEmpty (S) != 1 && STop(S)->key == ARG_LIST){ //Load params to typs
             ptr = STopPop (S);
-            printf("uzel: %s\n",getNodeString(ptr->key));
             if (ptr->LPtr != NULL){
                   ptr = push_right_go_left (ptr, S);
-                  printf("uzel: %s\n",getNodeString(ptr->key));
-                  printf("Ruzel: %s\n",getNodeString(STop(S)->key));
                   //DECLARATION
                   ptr = ptr->RPtr;
-                  printf("uzel: %s\n",getNodeString(ptr->key));
                   //ID
                   name = ptr->literal;
                   if (strchr(name, (int)'.') != NULL){
@@ -203,7 +192,6 @@ int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass){
                         IAL_htDispose(LHTable);
                         return 6;      
                   }
-                  printf ("fparam name = %s  typ = %c\n", name, types[i]);
                   if (IAL_htSearch(LHTable, name) == NULL){
                         vartypes = add_char_behind_types ("P", types[i]);
                         error = IAL_htInsert(LHTable, name, 0, vartypes);
@@ -222,13 +210,10 @@ int function_control(tTNodePtr ptr, IAL_HashTable *HTable, char *ActClass){
                   }                           
             }
       }
-      //printf("uzel: %s\n",getNodeString(ptr->key));
       ptr = STopPop (S);
-      //printf("uzel: %s\n",getNodeString(ptr->key));
       
       //ST_LIST       
       if (ptr != NULL && ptr->key == ST_LIST){
-            printf("ST_LIST: %s\n",getNodeString(ptr->key));
             error = st_list_control (ptr, HTable, LHTable, ActClass, types);
             if (error != 0){
                   DStack (S);
@@ -253,17 +238,12 @@ int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTabl
       SPush (S, ptr);
       
       do{
-            printf("st_control\n");
             ptr = STopPop (S);
-            printf("LPtr: %d\n",ptr->LPtr == NULL);
-            printf("LPtr: %d\n",ptr->RPtr == NULL);
-            printf("uzel22: %s\n",getNodeString(ptr->key));
             //ST_LIST
             if (ptr != NULL && ptr->key == ST_LIST)
                   ptr = push_right_go_left (ptr, S); 
             //LOCAL_VAR 
             if (ptr != NULL && ptr->key == LOCAL_VAR){
-                  printf("uzel3: %s\n",getNodeString(ptr->key));
                   ptr = push_right_go_left (ptr, S);
                   //DECLARATION
                   ptr = push_right_go_left (ptr, S);
@@ -285,7 +265,7 @@ int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTabl
                         DStack (S);
                         return 6;      
                   }
-                  printf("lovalvar: %s  typs:%s\n",name,typs);
+          
                   if (IAL_htSearch(LHTable, name) == NULL){
                         error = IAL_htInsert(LHTable, name, 0, typs);
                         free(typs);
@@ -314,7 +294,6 @@ int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTabl
             }
             //STATEMENT
             if (ptr != NULL && ptr->key == STATEMENT){
-                  printf("uzel: %s\n",getNodeString(ptr->key));
                   error = statement_control(ptr, HTable, LHTable, ActClass, ftypes);
                   if (error != 0){
                         DStack (S);
@@ -323,7 +302,6 @@ int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTabl
                   
             }
               
-      //printf("uzelend: %s\n",getNodeString(ptr->key));
       }while (!SEmpty (S));
             
       return 0;
@@ -341,10 +319,8 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
 
       SInit (S);
 
-      printf("statement\n");
       //STATEMENT
       ptr = ptr->LPtr;
-      printf("uzelstatement: %s\n",getNodeString(ptr->key));
       //ASSIGNMENT
       if (ptr->key == ASSIGNMENT){
             ptr = push_right_go_left (ptr, S);
@@ -386,7 +362,6 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
 
       //CONDITION
       if (ptr->key == CONDITION){
-            printf("CONDITION\n");
             ptr = push_right_go_left (ptr, S);
             //COMPARISON
             ptr = push_right_go_left (ptr, S);
@@ -429,7 +404,6 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
       }
       //CYCLE
       if (ptr->key == CYCLE){
-            printf("CYCLE\n");
             ptr = push_right_go_left (ptr, S);
             //COMPARISON
             ptr = push_right_go_left (ptr, S);
@@ -461,7 +435,6 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
 
       //CALL
       if (ptr->key == CALL){
-            printf("CALLL\n");
             error = call_control(ptr, HTable, LHTable, ActClass, &returns);
             if (error != 0){
                   DStack (S);      
@@ -492,7 +465,6 @@ int block_list_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       SPush (S, ptr);
 
       do{
-            printf("block_list_control\n");
             ptr = STopPop (S);
             //BLOCK_LIST
             ptr = push_right_go_left (ptr, S);
@@ -520,7 +492,6 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
       tStackPtr stack;      
       tStackPtr *S = &stack;
 
-      printf("call\n");
       SInit (S);
       //CALL 
       ptr = push_right_go_left (ptr, S);
@@ -584,7 +555,6 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
                                     ptr->literal = fullname; 
                               }
                               fullname = NULL; 
-                              printf("name ----> %s\n",ptr->literal);
                         }
                   }
                   
@@ -635,14 +605,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       SPush (S, ptr);
       
       do{
-            printf("expression\n");
             ptr = STopPop (S);
-            printf("!!!uzel: %s\n",getNodeString(ptr->key));
             //EXPRESSION  
             if (ptr != NULL){
                   while (ptr->key == EXPRESSION){          
                         ptr = push_right_go_left (ptr, S);
-                        printf("uzel: %s\n",getNodeString(ptr->key));
                   }           
              }
          
@@ -760,34 +727,34 @@ void load_typ_literal (node_t key, char *typ){
 int load_inner (IAL_HashTable *HTable){
       int error = 0;
 
-      error = load_inner_function (HTable, "IFJ16.readInt", "FI");
+      error = load_inner_function (HTable, "ifj16.readInt", "FI");
       if (error != 0)
             return 99;       
-      error = load_inner_function (HTable, "IFJ16.readDouble", "FD");
+      error = load_inner_function (HTable, "ifj16.readDouble", "FD");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.readString", "FS");
+      error = load_inner_function (HTable, "ifj16.readString", "FS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.print", "FVS");
+      error = load_inner_function (HTable, "ifj16.print", "FVS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.length", "FIS");
+      error = load_inner_function (HTable, "ifj16.length", "FIS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.substr", "FSSII");
+      error = load_inner_function (HTable, "ifj16.substr", "FSSII");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.compare", "FISS");
+      error = load_inner_function (HTable, "ifj16.compare", "FISS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.find", "FISS");
+      error = load_inner_function (HTable, "ifj16.find", "FISS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.sort", "FSS");
+      error = load_inner_function (HTable, "ifj16.sort", "FSS");
       if (error != 0)
             return 99;
-      error = load_inner_function (HTable, "IFJ16.IntToReal", "FDI");
+      error = load_inner_function (HTable, "ifj16.IntToReal", "FDI");
       if (error != 0)
             return 99;
 
@@ -833,7 +800,6 @@ int load_static (tTNodePtr ptr, IAL_HashTable *HTable){
             ptr = STopPop (S);
             //CLASS_LIST
             if (ptr != NULL && ptr->key == CLASS_LIST){
-                  printf("more class? =%d\n",ptr->RPtr != NULL);
                   ptr = push_right_go_left (ptr, S);
             }
             
@@ -841,8 +807,7 @@ int load_static (tTNodePtr ptr, IAL_HashTable *HTable){
             if (ptr != NULL && ptr->key == CLASS){
                   ptr = push_right_go_left (ptr, S);
                   ActClass = ptr->literal;
-                  printf("load ActClass =%s\n",ActClass);
-                  if (error = IAL_htInsert(CHTable, ActClass, 0, "C") != NULL){ //Control class redefinition
+                  if (error = IAL_htInsert(CHTable, ActClass, 0, "C") != 0){ //Control class redefinition
                         DStack (S);
                         return (error == 3)? 3 : 99;
                   }
@@ -871,7 +836,6 @@ int load_static (tTNodePtr ptr, IAL_HashTable *HTable){
             }
       }while (!SEmpty (S));
       
-      printf("LOAD END\n");
       IAL_htDispose(CHTable);
       return 0;     
 }      
