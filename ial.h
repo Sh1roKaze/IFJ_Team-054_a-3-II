@@ -7,8 +7,13 @@
 #ifndef IAL_
 #define IAL_
 
-// Najde řetězec search uvnitř řetězce s a vrátí jeho pozici.
-// V řípadě neúspěchu vrací -1.
+// Find first occur. of the search string in s string
+// s - string to be searched in
+// search - string to be searched for
+// return index of the firs foun search string
+//        0 when search string is empty
+//        -1 when no search string is found in s
+//        -99 when malloc error
 int IFJ16_find(char *s, char *search);
 
 // Sort characters from in to out by their char value using Shell Sort method
@@ -26,6 +31,7 @@ typedef struct IAL_htItem {
 	struct IAL_htItem *next; // Next synonyms pointer
 	void *valptr; // Pointer to value of variable
 	int n; // length of types array
+	int index; // Index in class
 	char types[];
 	// types[0] = V/F(variable/function)
 	// types[1] = V/I/D/S(void/int/double/string) type of variable or return type of function
@@ -57,7 +63,7 @@ IAL_htItem *IAL_htSearch(IAL_HashTable *htptr, char *id);
 //         1 in case of NULL param
 //         2 in case of malloc error
 //         3 when item with the same ID alredy exists
-int IAL_htInsert(IAL_HashTable *htptr, char *id, char *types);
+int IAL_htInsert(IAL_HashTable *htptr, char *id, int index, char *types);
 
 // Remove all the items and free memory allocated for items
 void IAL_htDispose(IAL_HashTable *htptr);

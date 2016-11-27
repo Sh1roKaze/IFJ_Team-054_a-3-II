@@ -1,4 +1,6 @@
 /* header */
+#ifndef PARSER_H
+#define PARSER_H
 
 #include "token.h"
 
@@ -48,7 +50,12 @@ typedef struct tTNode	{
 /* prototypes */
 
 tTNodePtr derivationTree; //Root of derivation tree
-struct Token *token; //global token variable
+Token *token; //global token variable
 int ret; //global return variable
 
-int parser();
+void freeTree(tTNodePtr *tree);
+int file(tTNodePtr tree);
+void printTree(tTNodePtr tree);
+char *getNodeString(node_t type); 
+
+#endif
