@@ -3,6 +3,12 @@
 // (c) Jan Oškera
 // V rámci projektu do předmětů IFJ a IAL
 
+#ifndef stack_
+#define stack_
+
+#include "parser.h"
+#include <stdlib.h>
+
 //type for item in stack struct
 typedef tTNodePtr tItemStack;
 
@@ -27,3 +33,5 @@ int SEmpty (tStackPtr *S);
 void DStack (tStackPtr *S);
 //read top
 tItemStack STop (tStackPtr *S);
+
+#endif

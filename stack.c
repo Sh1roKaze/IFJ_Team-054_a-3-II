@@ -33,7 +33,7 @@ tItemStack STopPop (tStackPtr *S)
 {
       tStackPtr del;
       tItemStack back;
-	if (*S != NULL)
+	if (*S != NULL){
 		del = *S;
             *S = (*S)->next;
             back = del->item;
@@ -66,5 +66,5 @@ void DStack (tStackPtr *S){
             *S = (*S)->next;
             free(del);
       }
-            
+      *S = NULL;
 }
