@@ -25,7 +25,6 @@ void InsertFirst (tList *, tTNodePtr *);
 void DeleteFirst (tList *);
 
 //HERE ARE LIONS
-int interpretStart();
-int interpretEnd();
+int interpret();
 
 #endif

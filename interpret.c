@@ -179,7 +179,7 @@ int treePass(tTNodePtr trP)
  } 
 
 //HERE ARE LIONS
- int interpretStart(); 
+ int interpret(); 
  int interpretEnd();
  char *mallocString(char *s);
  void addInternalFunctions(varTable table);
@@ -215,12 +215,21 @@ int treePass(tTNodePtr trP)
  extern tTNodePtr derivationTree;
 
 
+ /*Start interpretu:
+  inicializuje tabulku funkcí a globálních proměnných (globalTable)
+  inicializuje zásobník pro tabuky lokálních proměnných
+  zavede do globalTable jména vnitřních funkcí a jejich návratové hodnoty
+  zavede do globalTable všechny globální proměnné + jména všech funkcí a jejich návratové hodnoty
+  začne vykonávat funkci Main.run
+  deinicializuje všechny tabulky proměnných 
+*/
  int interpretStart() {
      globalTable = VTinit(NULL, NULL, 0, 101);
      tableStack = VSinit();
      addInternalFunctions(globalTable);
      makeGlobalTable(derivationTree);
      int ret = executeFunction("Main.run", NULL, NULL);
+     interpretEnd(); 
      return ret;
  }
 
@@ -253,7 +262,13 @@ int treePass(tTNodePtr trP)
      VTinsert(table, mallocString("ifj16.IntToReal"), 2, NULL);
  }
 
-
+ /* vloží do globalTable funkci
+    root je kořen stromu deklarace funkce
+    s je ukazatel na string se jménem třídy
+    Položka funkce v tabulce se skládá z plně kvantifikovaného jména funkce,
+    typu její návratové hodnoty 
+    a ukazatele do paměti kde bude uložena návratová hodnota funkce po jejím zavolání
+ */
  void fGInsert(tTNodePtr root, char *s) {
 
      char *temp = getID((root->LPtr)->RPtr);
@@ -270,6 +285,13 @@ int treePass(tTNodePtr trP)
      VTinsert(globalTable, joined, ftype, NULL);
  }
 
+/* vloží do globalTable globální proměnnou
+    root je kořen stromu deklarace proměnné
+    s je ukazatel na string se jménem třídy
+    Položka globální proměnné v tabulce se skládá z plně kvantifikovaného jména proměnné,
+    jejího datového typu 
+    a ukazatele do paměti kde bude uložena její hodnota
+ */
   void sGInsert(tTNodePtr root, char *s) {
 
      char *temp = getID((root->LPtr)->RPtr);
@@ -283,11 +305,13 @@ int treePass(tTNodePtr trP)
          case DOUBLE_DATA: vtype = 5; break;
          case STRING_DATA: vtype = 6; break;
      }
-     void *ptr = evaluate(root->RPtr, vtype);
+     void *ptr = evaluate(root->RPtr, vtype);    
      VTinsert(globalTable, joined, vtype, ptr);
  }
 
-
+/*
+projde strom a vytvoří položku v globalTable pro každou funkci a proměnnou
+*/
  int makeGlobalTable(tTNodePtr root) {
  tTNodePtr temp = root;
  tTNodePtr other_temp = NULL;
@@ -308,7 +332,9 @@ int treePass(tTNodePtr trP)
  return 0;
  }
 
-
+/*
+vyhledá ve stromu vstupní uzel funkce
+*/
  tTNodePtr findEntryPoint(tTNodePtr root, char *c, char *f) { 
  char *s =NULL;
  if (f == NULL) {
@@ -351,7 +377,9 @@ int treePass(tTNodePtr trP)
      return root->literal; 
  }
 
-
+/*
+vyhodnotí výraz typu zadaného pomocí "etype"
+*/
  void* evaluate(tTNodePtr root, int etype) {
      if (root == NULL) {
          return NULL;
@@ -378,7 +406,9 @@ int treePass(tTNodePtr trP)
 
  }
 
-
+/*
+rekurzivní vyhodnocení výrazu typu int
+*/
  int intEvaluate(tTNodePtr root) {
      int temp = 0;
      int other_temp = 0;
@@ -448,6 +478,9 @@ int treePass(tTNodePtr trP)
      }
  } 
 
+/*
+rekurzivní vyhodnocení výrazu typu double
+*/
   double doubleEvaluate(tTNodePtr root) {
      double temp = 0;
      double other_temp = 0;
@@ -514,7 +547,9 @@ int treePass(tTNodePtr trP)
      }
  } 
 
- 
+/*
+rekurzivní vyhodnocení výrazu typu string
+*/ 
  char *stringEvaluate(tTNodePtr root) {
      char *temp = NULL;
      char* other_temp = NULL;
@@ -566,7 +601,9 @@ int treePass(tTNodePtr trP)
      }
  }
 
-
+/*
+relativně rychlé určení zda je volaná funkce vnitřní nebo ne
+*/
  int isInternal(char *s) {
      if (strspn(s, "ifj16.") == 6) {
          return 1;
@@ -575,19 +612,24 @@ int treePass(tTNodePtr trP)
      }
  }
 
-
+//pomocná funkce pro zpracování argumentání při volání ifj16.substr();
  void substrHelp(tTNodePtr root, int *a, int *b) {
      *a = atoi((root->LPtr)->literal);
      root = root->RPtr;
      *b = atoi((root->LPtr)->literal);
  }
 
-
+/*
+implementace funkce ifj16.print()
+*/
  void IFJ16_print(tTNodePtr parameters) {
+     //TODO
      printf("%s", stringEvaluate(parameters->LPtr));
  }
 
-
+/*
+univerzální funkce pro vykonání vnitřní funkce
+*/
  int executeInternal(char *c, char *f, tTNodePtr parameters) {
 
      tableElemPtr temp = VTsearch(globalTable, c); 
@@ -652,7 +694,9 @@ int treePass(tTNodePtr trP)
      
  }
  
-
+/*
+funkce pro volání funkce během běhu interpretu
+*/
  tableElemPtr functionCall(tTNodePtr root) {
      if (isInternal(getID(root->LPtr))) {
          int ret = executeInternal(getID(root->LPtr), NULL, root->RPtr);
@@ -664,7 +708,9 @@ int treePass(tTNodePtr trP)
      }
  }
 
-
+/*
+založí tabulku lokálních proměnných a přiřadí argumentům funkce jejich parametry
+*/
  varTable makeFunctionTable(char *c, char*f, tTNodePtr arguments, tTNodePtr parameters) {
      tableElemPtr fElem = VTsearch(globalTable, c);
      varTable temp = VTinit(c, f, fElem->type, 101);
@@ -688,7 +734,9 @@ int treePass(tTNodePtr trP)
      return temp;
  }
 
-
+/*
+vytvoří lokální proměnnou
+*/
  void makeLocalVar(varTable localTable, tTNodePtr root) {
      tTNodePtr temp = root->LPtr;
      char *c = getID(temp->RPtr);
@@ -702,7 +750,13 @@ int treePass(tTNodePtr trP)
      VTinsert(localTable, c, vtype, value); 
  }
 
-
+/*
+provede volanou funkci
+prakticky hlavní tělo interpretu
+pro zavolanou funkci najde vstupní bod,
+vytvoří tabulku lokálních proměnných
+provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné 
+*/
  int executeFunction(char *c, char *f, tTNodePtr parameters) {
      tTNodePtr start = findEntryPoint(derivationTree, c, f);  
      if (start == NULL) {
@@ -780,6 +834,9 @@ int treePass(tTNodePtr trP)
      return 0;
  }
 
+/*
+volání funkce a zahození její návratové hodnoty
+*/
  int doCall (tTNodePtr root) {
      tableElemPtr temp = functionCall(root);
      free(temp->val);
