@@ -125,10 +125,13 @@
      tree->LPtr = NULL;
      tree->RPtr = NULL;
      ret =  classList(tree); 
+     if (token == NULL) {
+         return 1;
+     } 
      if (ret == 2) {
          return 2;
-     } else {
-         return 0;
+     }
+     return 0;
      }
  }
 
