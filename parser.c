@@ -128,7 +128,7 @@
      if (token == NULL) {
          return 1;
      } 
-     if (ret == 2) {
+     if (ret == 2) { 
          return 2;
      }
      return 0;
@@ -208,6 +208,8 @@ int classitem(tTNodePtr tree) {
         tTNodePtr temp = malloc(sizeof(struct tTNode));
         token = getToken();
         ret = declaration(temp);
+        printTree(temp);
+        printf("\n");
         if (ret == 2) {
             return 2;
         }
@@ -302,13 +304,12 @@ int arglist(tTNodePtr tree) {
         if (accept(COMMA_OPERATOR)) {
             token = getToken();
             tree = tree->RPtr; 
-            tree->RPtr = malloc(sizeof(struct tTNode));
             ret = argument(tree);
             if (ret == 2) {
                 return 2;
             }
             tree->key = ARG_LIST;
-      
+            tree->RPtr = malloc(sizeof(struct tTNode));      
         } else {
             break;
         }
@@ -807,6 +808,8 @@ int literal(tTNodePtr tree) {
 
 
 int type(tTNodePtr tree) {
+    tree->LPtr = NULL;
+    tree->RPtr = NULL;
     if (accept(INT_DATA_TYPE)) {
         tree->key = INT_DATA;
         return 0;
@@ -834,6 +837,8 @@ int id(tTNodePtr tree) {
         return 2;
     }
     tree->key = ID;
+    tree->LPtr = NULL;
+    tree->RPtr = NULL;
     tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
     strcpy(tree->literal, token->data);
     return 0;
