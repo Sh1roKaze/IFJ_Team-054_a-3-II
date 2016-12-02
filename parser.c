@@ -590,7 +590,7 @@ int call(tTNodePtr tree) {
     tree->LPtr = malloc(sizeof(struct tTNode));
     ret = id(tree->LPtr);
     if (ret == 2) {
-        return 2;
+        return 3;
     }
     token = getToken();
     if (!accept(LEFT_PARENTHESIS)) {
@@ -765,7 +765,7 @@ int factor(tTNodePtr tree) {
     if (accept(IDENTIFIER)) {
         tree->LPtr = malloc(sizeof(struct tTNode));
         ret = call(tree->LPtr);
-        if (ret == 2) {
+        if (ret == 2 || ret == 3) {
             tTNodePtr temp = (tree->LPtr)->LPtr;
             //(tree->LPtr)->LPtr = NULL;
             //(tree->LPtr)->RPtr = NULL;
