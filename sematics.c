@@ -37,8 +37,9 @@ int subtree_int_to_real(tTNodePtr* ptr){
       if (id_f != NULL && par_list != NULL && id_p != NULL){        
             id_f->LPtr = NULL;
             id_f->RPtr = NULL;
-            id_f->key = IDENTIFIER;
-            id_f->literal = "IFJ16.IntToReal";
+            id_f->key = ID;
+            id_f->literal = malloc((strlen("IFJ16.IntToReal")+1)*sizeof(char));
+            strcpy(id_f->literal,"IFJ16.IntToReal");
             
             par_list->LPtr = id_p;
             par_list->RPtr = NULL;
@@ -52,7 +53,7 @@ int subtree_int_to_real(tTNodePtr* ptr){
             (*ptr)->LPtr = id_f;
             (*ptr)->RPtr = par_list;
             (*ptr)->key = CALL;
-            (*ptr)->literal = "";
+            (*ptr)->literal = NULL;
                   
       }
       else{
