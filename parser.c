@@ -208,8 +208,6 @@ int classitem(tTNodePtr tree) {
         tTNodePtr temp = malloc(sizeof(struct tTNode));
         token = getToken();
         ret = declaration(temp);
-        printTree(temp);
-        printf("\n");
         if (ret == 2) {
             return 2;
         }
