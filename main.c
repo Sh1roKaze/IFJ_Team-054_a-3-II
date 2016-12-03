@@ -1,18 +1,14 @@
-//#include "ial.h"
+#include "ial.h"
 #include "sematics.h"
 #include "lex_anal.h"
 #include "interpret.h"
 
 int main(){
-      int error = 0;
-      tTNodePtr ptr = NULL;
-      IAL_HashTable Table;
-      IAL_HashTable *HTable = &Table;
+      IAL_HashTable HTable;
       IAL_htItem *item = NULL;
       int ret;
 
-      //error = sematics(ptr, &HTable);
-      IAL_htInit(HTable);
+      IAL_htInit(&HTable);
 
       beginLexicalAnalysis();
 
@@ -20,12 +16,13 @@ int main(){
       ret = file(derivationTree);
       if (ret == 0) {
           ret = sematics(derivationTree, &HTable);
-          if (ret == 0) {
-              ret = interpretStart();
-              interpretEnd();
-          } 
+          //if (ret == 0) {
+          //    ret = interpretStart();
+          //    interpretEnd();
+          //} 
       }
  
+      IAL_htDispose(&HTable);
       freeTree(&derivationTree);
       return ret;
 }
