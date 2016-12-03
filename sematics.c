@@ -732,8 +732,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         ptr = push_right_go_left (ptr, S);
                   }           
              }
-         
-            
+                    
             //TERM
             if (ptr != NULL && ptr->key == TERM)          
                   ptr = push_right_go_left (ptr, S);
@@ -757,7 +756,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         }
                         else{
                               DStack (S);
-                              return 4;
+                              if (returns == 'V')
+                                    return 8;                             
+                              else
+                                    return 4;
                         }
                   }                   
             }
