@@ -14,7 +14,7 @@
 #include <string.h>
 
 int subtree_int_to_real(tTNodePtr* ptr);
-int sematics(tTNodePtr ptr, IAL_HashTable **Table);
+int sematics(tTNodePtr ptr, IAL_HashTable *Table);
 int load_static (tTNodePtr ptr, IAL_HashTable *HTable);
 int load_inner (IAL_HashTable *HTable);
 
