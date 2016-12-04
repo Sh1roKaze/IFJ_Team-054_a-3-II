@@ -6,12 +6,12 @@
 #include "stack.h"
 
 //extern variable detect malloc error
-int DetectStackError;
+int DetectStackError = 0;
 
 //init stack
 void SInit (tStackPtr *S)  
 {
-      DetectStackError = 0;
+      //DetectStackError = 0;
 	*S = NULL;  
 }	
 
