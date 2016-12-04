@@ -20,18 +20,19 @@ int block_list_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char *returns);
 int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char typ);
 int print_expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable);
-void load_typ_literal (node_t key, char *typ);
 int load_inner (IAL_HashTable *HTable);
 int load_inner_function (IAL_HashTable *HTable, char *id, char *t);
 int load_static (tTNodePtr ptr, IAL_HashTable *HTable);
 int function_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable);
 int static_var_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable);
-char* add_class_before_name (char *ActClass, char *name);
-void load_typ (node_t key, char *typ);
-char* add_typ_before_types (char typ, char *types);
-char *add_char_behind_types (char *types, char c);
-int check_exist_function(IAL_HashTable *HTable, char *name);
-tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
+static inline int try_find_global_load_item(tTNodePtr ptr, IAL_HashTable *HTable, char *name);
+static inline void load_typ_literal (node_t key, char *typ);
+static inline char* add_class_before_name (char *ActClass, char *name);
+static inline void load_typ (node_t key, char *typ);
+static inline char* add_typ_before_types (char typ, char *types);
+static inline char *add_char_behind_types (char *types, char c);
+static inline int check_exist_function(IAL_HashTable *HTable, char *name);
+static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
 
 //build structure for call function int to real, repleace int in tree
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -132,10 +133,13 @@ int sematics(tTNodePtr ptr, IAL_HashTable *HTable){
             }
       }while (!SEmpty (S));
       
-      return 0;
+      if (DetectStackError != 1)
+            return 0;
+      else
+            return 99;
 }
 
-int check_exist_function(IAL_HashTable *HTable, char *name){
+static inline int check_exist_function(IAL_HashTable *HTable, char *name){
       char *fullname;
       
       fullname = add_class_before_name (ActClass, name);
@@ -153,8 +157,6 @@ int check_exist_function(IAL_HashTable *HTable, char *name){
 
        free(fullname);
        return 0;
-
-
 }
 
 int function_control(tTNodePtr ptr, IAL_HashTable *HTable){
@@ -325,7 +327,6 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
       tStackPtr stack;      
       tStackPtr *S = &stack;
       char *name;
-      char *fullname;
       char typ;
       char returns;
 
@@ -345,20 +346,10 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
                   item = NULL;
                   
             if (item == NULL){//Try find global
-                  item = IAL_htSearch(HTable, name);
-                  if (item == NULL){
-                        fullname = add_class_before_name (ActClass, name);
-                        if (error != 0){                              
-                              DStack (S);   
-                              return error;
-                        }                        
-                        item = IAL_htSearch(HTable, fullname);
-                        if (item == NULL){
-                              DStack (S);
-                              free(fullname);                     
-                              return 3;  
-                        }    
-                        free(fullname); 
+                  error = try_find_global_load_item(ptr, HTable, name);
+                  if (error != 0){
+                        DStack (S);
+                        return error;
                   }
             }
 
@@ -518,20 +509,10 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
             fspecial = 1;
 
       //Try find function
-      item = IAL_htSearch(HTable, name);
-      if (item == NULL){
-            fullname = add_class_before_name (ActClass, name);
-            if (error != 0){                              
-                  DStack (S);                  
-                  return error;                  
-            }                        
-            item = IAL_htSearch(HTable, fullname);
-            if (item == NULL){
-                  free(fullname);
-                  DStack (S);                     
-                  return 3;  
-            }    
-            free(fullname); 
+      error = try_find_global_load_item(ptr, HTable, name);
+      if (error != 0){
+            DStack (S);
+            return error;
       }
 
       if ( (item->types)[0] != 'F'){
@@ -556,24 +537,10 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
                         item = NULL;
                   
                   if (item == NULL){//Try find global
-                        item = IAL_htSearch(HTable, name);
-                        if (item == NULL){
-                              fullname = add_class_before_name (ActClass, name);
-                              if (error != 0){                              
-                                    DStack (S);   
-                                    return error;
-                              }                        
-                              item = IAL_htSearch(HTable, fullname);
-                              if (item == NULL){
-                                    DStack (S);
-                                    free(fullname);                     
-                                    return 3;  
-                              }    
-                              else{
-                                    free(ptr->literal);
-                                    ptr->literal = fullname; 
-                              }
-                              fullname = NULL; 
+                        error = try_find_global_load_item(ptr, HTable, name);
+                        if (error != 0){
+                              DStack (S);
+                              return error;
                         }
                   }
                   
@@ -627,7 +594,6 @@ int print_expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable
       tStackPtr *S = &stack;
       char returns;
       char *name;
-      char *fullname;
       
       SInit (S);
       SPush (S, ptr);
@@ -666,24 +632,10 @@ int print_expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable
                   }
 
                   if (item == NULL){//Try find global
-                        item = IAL_htSearch(HTable, name);
-                        if (item == NULL){
-                              fullname = add_class_before_name (ActClass, name);
-                              if (error != 0){                              
-                                    DStack (S);                       
-                                    return error;
-                              }                        
-                              item = IAL_htSearch(HTable, fullname);
-                              if (item == NULL){
-                                    DStack (S);
-                                    free(fullname);                           
-                                    return 3;                                    
-                              }
-                              else{ //full id to tree
-                                    free(ptr->literal);
-                                    ptr->literal = fullname;      
-                              }                     
-                              fullname = NULL;
+                        error = try_find_global_load_item(ptr, HTable, name);
+                        if (error != 0){
+                              DStack (S);
+                              return error;
                         }
                   }
                   
@@ -761,24 +713,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   }
 
                   if (item == NULL){//Try find global
-                        item = IAL_htSearch(HTable, name);
-                        if (item == NULL){
-                              fullname = add_class_before_name (ActClass, name);
-                              if (error != 0){                              
-                                    DStack (S);                       
-                                    return error;
-                              }                        
-                              item = IAL_htSearch(HTable, fullname);
-                              if (item == NULL){
-                                    DStack (S);
-                                    free(fullname);                           
-                                    return 3;                                    
-                              }
-                              else{ //full id to tree
-                                    free(ptr->literal);
-                                    ptr->literal = fullname;      
-                              }                     
-                              fullname = NULL;
+                        error = try_find_global_load_item(ptr, HTable, name);
+                        if (error != 0){
+                              DStack (S);
+                              return error;
                         }
                   }
                   
@@ -826,7 +764,30 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       return 0;            
 }
 
-void load_typ_literal (node_t key, char *typ){
+static inline int try_find_global_load_item(tTNodePtr ptr, IAL_HashTable *HTable, char *name){
+      char *fullname;
+      
+       item = IAL_htSearch(HTable, name);
+       if (item == NULL){
+            fullname = add_class_before_name (ActClass, name);
+            if (error != 0){                              
+                return error;
+            }                        
+            item = IAL_htSearch(HTable, fullname);
+            if (item == NULL){
+                  free(fullname);                     
+                  return 3;  
+            }    
+            else{ //full id to tree
+                  free(ptr->literal);
+                  ptr->literal = fullname; 
+            }      
+      }
+
+      return 0;
+}
+
+static inline void load_typ_literal (node_t key, char *typ){
       if (key == STRING)
             *typ = 'S';
       else
@@ -1075,13 +1036,13 @@ int static_var_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable
 }
 
 
-tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S){
+static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S){
        if (ptr->RPtr != NULL)
             SPush (S, ptr->RPtr);
        return ptr->LPtr;
 }
 
-char* add_class_before_name (char *ActClass, char *name){
+static inline char* add_class_before_name (char *ActClass, char *name){
       size_t size;
       char* new;
 
@@ -1102,7 +1063,7 @@ char* add_class_before_name (char *ActClass, char *name){
       return new;          
 }
 
-void load_typ (node_t key, char *typ){
+static inline void load_typ (node_t key, char *typ){
       if (key == STRING_DATA)
             *typ = 'S';
       else{
@@ -1116,7 +1077,7 @@ void load_typ (node_t key, char *typ){
       }                       
 }
 
-char* add_typ_before_types (char typ, char *types){
+static inline char* add_typ_before_types (char typ, char *types){
       size_t size;
       char* new;
       
@@ -1130,7 +1091,7 @@ char* add_typ_before_types (char typ, char *types){
       return new;
 }
 
-char *add_char_behind_types (char *types, char c){
+static inline char *add_char_behind_types (char *types, char c){
       size_t size;
       char* new;
       
