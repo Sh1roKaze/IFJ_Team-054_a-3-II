@@ -98,7 +98,7 @@ Buffer *initializeBuffer(unsigned int size) {
       return b;
   }
   printErrorMessageAndPrepareForExiting("malloc failure", 99);
-  return NULL; // if Johny (AKA Big Boss) doesn't mind, switch this line for 'exit(99);'
+  exit(errorCode);
 }
 
 int isBufferEmpty(Buffer *b) {
@@ -126,14 +126,12 @@ State datalessType() { //printf("[currentState] DATALESS TYPE: %c | %x | %d | %c
     else if (currentDatalessTokenType == DO_KEYWORD && mainBuffer->position == 2 && currentCharacter == 'u') // do keyword is contained in double keyword, therefore special verification is essential
       currentDatalessTokenType++;
     else if (currentDatalessTokenType > RIGHT_CURLY_BRACKET) {
-      if (mainBuffer->position < strlen(datalessTokenType[currentDatalessTokenType]) && (currentCharacterMatchWhitespace() || currentCharacterMatchOperatorTokenType() != -1)) {
+      if (currentCharacterMatchWhitespace() || currentCharacterMatchOperatorTokenType() != -1) {
         transferedCharacter = currentCharacter;
-        endCurrentTokenWithData(IDENTIFIER);
-        return;
-      }
-      else if (currentCharacterMatchWhitespace() || currentCharacterMatchOperatorTokenType() != -1) { // sloucit s predchozi podminkou!!
-        transferedCharacter = currentCharacter;
-        endCurrentToken(currentDatalessTokenType);
+        if (mainBuffer->position < strlen(datalessTokenType[currentDatalessTokenType]))
+          endCurrentTokenWithData(IDENTIFIER);
+        else
+          endCurrentToken(currentDatalessTokenType);
         return;
       }
       else if (currentCharacterMatchIdentifierNextLetter())
