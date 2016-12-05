@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		double i = 5 / 0.1;
+		ifj16.print(i);
+	}
+}

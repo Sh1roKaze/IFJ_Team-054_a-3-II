@@ -504,7 +504,7 @@ Token *getToken() {
 
   while (1) { // it is very unlikely for the buffer to be reallocated so many times it would cause an overflow (but its' not entirely bad idea to take care of it some other day in the future)
     while (mainBuffer->position < mainBuffer->size * mainBuffer->multiplier - 1) { // since currentCharacter is expected to fill current mainBuffer's array position and at any point the end of currentToken could be reached, at least the last position of the mainBuffer's array must not be used, in order to be filled with '\0', if needed
-      if ((currentCharacter = getchar()) != EOF) {
+      if ((currentCharacter = fgetc(stdin)) != EOF) {
         currentState();
         if (endOfTokenFlag)
           return currentToken;

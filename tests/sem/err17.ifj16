@@ -1,0 +1,17 @@
+class Main
+{
+	static void run()
+	{
+		int i = 20;
+		String s = "20";
+
+		if (a != s)
+		{
+			
+		}
+		else
+		{
+			
+		}
+	}
+}

@@ -1,0 +1,7 @@
+class Main
+{
+	static void run()
+	{
+		int a = 5 = 7; // Přiřazení není výraz
+	}
+}

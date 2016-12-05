@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		String a = "Ahoj\nSve'te\\\042 \009"; // Číslice 9 v okatlovém kódu
+		ifj16.print(a);
+	}
+}

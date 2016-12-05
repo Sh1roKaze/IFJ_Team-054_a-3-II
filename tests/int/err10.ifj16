@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		String s1;
+		ifj16.sort(s1);
+	}
+}

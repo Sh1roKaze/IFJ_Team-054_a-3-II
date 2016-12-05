@@ -1,0 +1,8 @@
+class Main
+{
+	static String s1 = "Ahoj
+svete!";
+	static void run() { }	
+}
+
+

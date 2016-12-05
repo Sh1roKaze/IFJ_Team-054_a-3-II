@@ -1,0 +1,12 @@
+class Main
+{
+	static void run()
+	{
+		ifj16.print(c2.i1);
+	}
+}
+
+class c2
+{
+	static int i1 = 0;
+}

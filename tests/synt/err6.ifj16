@@ -1,0 +1,11 @@
+//funkcia nema static
+
+class Main()
+{
+	static void run()
+	{
+		
+	}
+
+	void nonStatFunc() { } // Funkce není statická
+}

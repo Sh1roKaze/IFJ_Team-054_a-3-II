@@ -1,0 +1,17 @@
+class Main
+{
+	static String $_Str_1;
+
+	static void run()
+	{
+		String s1 = "";
+		String s2 = "neprazdny text";
+		String s3;
+		s2 = "Ahoj\nSve'te\\\0420";
+		s3 = "   Ahoj světe";
+
+		ifj16.print(s1);
+		ifj16.print(s2);
+		ifj16.print(s3);
+	}
+}

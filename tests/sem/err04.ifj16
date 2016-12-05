@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{
+		if (1)
+		{
+            
+		}
+                else 
+                {
+
+                }
+	}
+}

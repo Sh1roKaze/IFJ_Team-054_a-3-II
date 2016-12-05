@@ -1,0 +1,9 @@
+class Main
+{
+	int i = 1; // Proměnná ve třídě musí být statická
+
+	static void run()
+	{
+		
+	}
+}

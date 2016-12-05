@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		String a = "Ahoj\nSve'te\\\042 \777"; // příliš vysoká hodnota \777
+		ifj16.print(a);
+	}
+}

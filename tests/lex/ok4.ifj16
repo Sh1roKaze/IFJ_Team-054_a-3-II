@@ -1,0 +1,11 @@
+class Main
+{
+	static void run()
+	{
+		String s1 = "";
+		String _s2 = "neprazdny text";
+		
+		ifj16.print(s1);
+		ifj16.print(_s2);
+	}
+}

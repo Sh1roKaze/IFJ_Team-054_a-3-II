@@ -1,0 +1,7 @@
+class Main
+{
+    static void run()
+    {
+         int i = 15.0;
+    }
+}

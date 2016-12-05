@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{
+		int i = 2;
+		int u = 5;
+		while (i > 0)
+		{
+			u = u + i * 2;
+			i = i - 1;
+		}
+		ifj16.print(u);
+	}
+}

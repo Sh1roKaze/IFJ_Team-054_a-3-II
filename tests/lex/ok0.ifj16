@@ -1,0 +1,11 @@
+class Main
+{
+	static void run()
+	{
+/* složený komentář z /* a "* /" (bez mezery */
+// jednořádkový komentář /**/ kombinace
+/* // jiná možnost */
+/*
+//*/
+	}
+}

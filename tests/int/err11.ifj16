@@ -1,0 +1,15 @@
+class Main
+{
+	static void run()
+	{
+		int i;
+		if (i != 0)
+		{
+			
+		}
+		else
+		{
+
+		}
+	}
+}

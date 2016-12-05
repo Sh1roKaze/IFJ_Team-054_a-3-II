@@ -1,0 +1,37 @@
+class Main
+{
+	static String $_Str_1;
+
+	static void run()
+	{
+/* složený komentář z /* a "* /" (bez mezery */
+		String s1 = ""; // /**/*/ Toto je komentář na jeden řádek
+		String _s2 = "neprazdny text";
+		String s3;
+		_s2 = "!\n";
+		s1 = "   Ahoj světe";
+		s3 = "Ahoj\nSve'te\\\0420";
+		int i1 = 0 -5;
+		int i2 = 077; //Okatalově zapsaná hodnota 63
+		double d1 = 0;
+		d1 = 0.0;
+		d1 = d1 -0.1;
+		d1 = 1e2;
+		d1 = 1e+2;
+		d1 = 1e-2;
+		d1 = 1E+2;
+		d1 = 1.5E+2;
+		d1 = 01.5E+01; // V d1 by měla být hodnota 15.0
+		
+		
+		ifj16.print(s1);
+		ifj16.print($_Str_1);
+		ifj16.print(Main.$_Str_1);
+		ifj16.print(_s2);
+		ifj16.print(s3);
+		ifj16.print(i1);
+		ifj16.print(i2);
+		ifj16.print(d1);
+		return;
+	}
+}

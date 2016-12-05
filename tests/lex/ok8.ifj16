@@ -1,0 +1,19 @@
+class Main
+{
+	static String $_Str_1;
+
+	static void run()
+	{
+		double d5 = 1e+2;
+		double d6 = 1e-2;
+		double d7 = 1E+2;
+		double d8 = 1.5E+2;
+		double d9 = 01.5E+01; // V d9 by měla být hodnota 15.0
+		
+		ifj16.print(d5);
+		ifj16.print(d6);
+		ifj16.print(d7);
+		ifj16.print(d8);
+		ifj16.print(d9);
+	}
+}

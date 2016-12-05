@@ -1,0 +1,21 @@
+class Main
+{
+	static void run()
+	{
+		int x;
+		int y = 0;
+		while (y < 5)
+		{
+			x = 0;
+			ifj16.print(y);
+			ifj16.print(":");
+			while (x < 5)
+			{
+				ifj16.print(x);
+				x = x + 1;
+			}
+			ifj16.print("\n");
+			y = y + 1;
+		}
+	}
+}

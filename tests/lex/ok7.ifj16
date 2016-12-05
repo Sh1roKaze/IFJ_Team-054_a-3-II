@@ -1,0 +1,17 @@
+class Main
+{
+	static String $_Str_1;
+
+	static void run()
+	{
+		double d1 = 0;
+		double d2 = 0.0;
+		double d3 = d1 -0.1;
+		double d4 = 1e2;
+		
+		ifj16.print(d1);
+		ifj16.print(d2);
+		ifj16.print(d3);
+		ifj16.print(d4);
+	}
+}

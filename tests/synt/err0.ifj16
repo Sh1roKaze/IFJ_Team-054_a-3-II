@@ -1,0 +1,11 @@
+class Main
+{
+    static void run()
+    {
+        if 0 > 1  // Chybí závorky
+        {
+        	
+        }
+    }
+
+}

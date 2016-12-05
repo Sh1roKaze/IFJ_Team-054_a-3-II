@@ -1,0 +1,10 @@
+class Main
+{
+	static String Str;
+
+	static void run()
+	{
+		Main.Str = "ahoj";
+		ifj16.print(Str);
+	}
+}

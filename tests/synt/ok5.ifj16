@@ -1,0 +1,16 @@
+class Main
+{
+	static void run()
+	{
+		int i = 5;
+
+		if (i == 4)
+		{
+			ifj16.print("je to 4");
+		}
+		else
+		{
+			ifj16.print("neni to 4");
+		}
+	}
+}

@@ -1,0 +1,7 @@
+class Main
+{
+	static String a = "Ahoj \světe!";
+	static void run() { }
+}
+
+

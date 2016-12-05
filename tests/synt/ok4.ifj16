@@ -1,0 +1,13 @@
+class Main
+{
+	static void run()
+	{
+		int i = souc(1, 2);
+		ifj16.print(i);
+	}
+
+	static int souc(int i1, int i2)
+	{
+		return i1 + i2;
+	}
+}

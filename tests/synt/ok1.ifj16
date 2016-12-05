@@ -1,0 +1,9 @@
+class Main
+{
+	static String s;
+	static void run()
+	{
+		double d;
+		int i = 159;
+	}
+}

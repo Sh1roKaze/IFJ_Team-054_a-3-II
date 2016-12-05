@@ -1,0 +1,7 @@
+class Main
+{
+	static double d = 0.1.2;
+	static void run() { }
+}
+
+

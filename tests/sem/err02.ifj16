@@ -1,0 +1,9 @@
+// Použití nedefinované proměnné
+
+class Main
+{
+	static void run()
+	{
+		i = 1;
+	}
+}

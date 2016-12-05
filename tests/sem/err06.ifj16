@@ -1,0 +1,12 @@
+class Main
+{
+	static void run()
+	{
+		soucet(1, 2, 3);
+	}
+
+	static void soucet(int a, int b)
+	{
+	    	return a + n;
+	}
+}

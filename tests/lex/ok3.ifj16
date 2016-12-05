@@ -1,0 +1,8 @@
+class Main
+{
+	static String $_Str_1;
+
+	static void run()
+	{
+	}
+}

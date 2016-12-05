@@ -1,0 +1,13 @@
+class Main
+{
+    static void run()
+    {
+        int i = 1 + func(); // Nefunguje bez rozšíření FUNEXP
+    }
+
+    static int func()
+    {
+        int i = 5;
+        return a;
+    }
+}

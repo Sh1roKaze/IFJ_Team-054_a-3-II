@@ -1,0 +1,15 @@
+class Main
+{
+	static void run()
+	{
+		int i = 5;
+		if (i != 5.0)
+		{
+			ifj16.print("chyba\n");
+		}
+		else
+		{
+			ifj16.print("OK\n");
+		}
+	}
+}

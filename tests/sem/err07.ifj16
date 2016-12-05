@@ -1,0 +1,12 @@
+class Main
+{
+	static void run()
+	{
+		print(5);
+	}
+
+	static void print(String s)
+	{
+		ifj16.print(s);
+	}
+}

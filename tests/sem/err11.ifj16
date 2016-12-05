@@ -1,0 +1,13 @@
+class Main
+{
+	static void run()
+	{
+		String s = "";
+		func(s);
+	}
+    
+	static void func(int i)
+	{
+		
+	}
+}

@@ -1,0 +1,11 @@
+class Main
+{
+    static void run()
+    {
+        while (0) // Číslo není bool (není to céčko)
+        {
+
+        }
+    }
+
+}

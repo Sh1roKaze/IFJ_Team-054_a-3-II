@@ -1,0 +1,16 @@
+class Main
+{
+	static double d = 1.0;
+	static void run()
+	{
+		func();
+	}
+}
+
+class Test
+{
+	static void func()
+	{
+		int i = d;
+	}
+}

@@ -1,0 +1,7 @@
+class Main
+{
+	static void run()
+	{
+		static int i = 0; // Ve funkci nesmí být statická proměnná
+	}
+}

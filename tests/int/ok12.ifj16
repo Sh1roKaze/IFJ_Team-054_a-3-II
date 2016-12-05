@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		int i = ifj16.find("Dlhy test", "text");
+		ifj16.print(i + "\n");
+	}
+}

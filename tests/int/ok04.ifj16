@@ -1,0 +1,15 @@
+class Main
+{
+	static void run()
+	{
+		int i;
+		i = func();
+
+		ifj16.print(i + "\n");
+	}
+
+	static int func()
+	{
+		return 5 + 10 - 5 * 3;
+	}
+}

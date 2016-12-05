@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		if (1 > 0)
+		{
+			int i = 0;// Deklarace ve složeném příkazu
+		}
+	}
+}

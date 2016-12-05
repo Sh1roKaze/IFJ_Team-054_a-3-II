@@ -1,0 +1,13 @@
+class Main
+{
+	static void run()
+	{
+		int i = 25;
+		print(i);
+	}
+
+	static void print(double a)
+	{
+		ifj16.print(a + "\n");
+	}
+}

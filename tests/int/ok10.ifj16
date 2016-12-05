@@ -1,0 +1,9 @@
+class Main
+{
+	static int i = 5;
+	static void run()
+	{
+		int i = 10;
+		ifj16.print("i: " + i + " Main.i: " + Main.i + "\n");
+	}
+}

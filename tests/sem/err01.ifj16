@@ -1,0 +1,13 @@
+// Redefinice (stejný identifikátor)
+
+class Main
+{
+	static void run()
+	{
+		int id = 2;
+	}
+
+	static void id()
+	{
+	}
+}

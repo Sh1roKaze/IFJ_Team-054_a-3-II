@@ -1,0 +1,19 @@
+class Main
+{
+	static void run()
+	{
+		int a = 5;
+		double d = 2.589;
+		int c = 25;
+		int e = 10;
+
+		if (a + c > d*2 - c + e)
+		{
+			ifj16.print("OK\n");
+		}
+		else
+		{
+			ifj16.print("chyba\n");
+		}
+	}
+}

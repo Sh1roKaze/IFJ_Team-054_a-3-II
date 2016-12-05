@@ -1,0 +1,14 @@
+class Main
+{
+	static void run()
+	{
+		if (5 == "5")
+		{
+			
+		}
+		else
+		{
+			
+		}
+	}
+}

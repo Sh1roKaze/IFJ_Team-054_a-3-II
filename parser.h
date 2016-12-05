@@ -2,7 +2,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "token.h"
+#include "lex_anal.h"
 
 typedef enum {
     CLASS_LIST,

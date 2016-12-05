@@ -1,0 +1,8 @@
+class Main
+{
+	static void run()
+	{
+		String s = "aa";
+		ifj16.substr(s, 5, 2);
+	}
+}
