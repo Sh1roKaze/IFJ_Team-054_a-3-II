@@ -34,3 +34,5 @@ parser.o : parser.c parser.h
 clean :
 	rm main.o sematics.o interpret.o stack.o mem_management.o ifj16.o ial.o lex_anal.o parser.o
 
+test : all
+	sh test.sh
