@@ -36,7 +36,8 @@ typedef enum {
     DOUBLE_DATA,
     VOID_DATA,
     ID,
-    COMPARISON   
+    COMPARISON,
+    UNINITIALIZED   
 } node_t;
 
 typedef struct tTNode	{                              

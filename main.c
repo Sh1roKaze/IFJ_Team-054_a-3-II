@@ -35,7 +35,6 @@ int main(int argc, char *argv[]){
           //}
           IAL_htDispose(&HTable); 
       }
- 
       freeTree(&derivationTree);
       return ret;
 }
