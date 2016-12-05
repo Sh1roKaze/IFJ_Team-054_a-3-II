@@ -215,25 +215,20 @@ int treePass(tTNodePtr trP)
  extern tTNodePtr derivationTree;
 
 
- /*Start interpretu:
-  inicializuje tabulku funkcí a globálních proměnných (globalTable)
-  inicializuje zásobník pro tabuky lokálních proměnných
-  zavede do globalTable jména vnitřních funkcí a jejich návratové hodnoty
-  zavede do globalTable všechny globální proměnné + jména všech funkcí a jejich návratové hodnoty
-  začne vykonávat funkci Main.run
-  deinicializuje všechny tabulky proměnných 
-*/
- int interpretStart() {
-     globalTable = VTinit(NULL, NULL, 0, 101);
-     tableStack = VSinit();
-     addInternalFunctions(globalTable);
-     makeGlobalTable(derivationTree);
-     int ret = executeFunction("Main.run", NULL, NULL);
-     interpretEnd(); 
+ /*Start interpretu */
+ int interpret() {
+     globalTable = VTinit(NULL, NULL, 0, 101);            //inicializuje tabulku funkcí a globálních proměnných (globalTable)
+     tableStack = VSinit();                               //inicializuje zásobník pro tabuky lokálních proměnných
+     addInternalFunctions(globalTable);                   //zavede do globalTable jména vnitřních funkcí a jejich návratové hodnoty
+     makeGlobalTable(derivationTree);                     //zavede do globalTable všechny globální proměnné + jména všech funkcí a jejich návratové hodnoty
+     int ret = executeFunction("Main.run", NULL, NULL);   //začne vykonávat funkci Main.run
+     interpretEnd();                                      //deinicializuje všechny tabulky proměnných 
      return ret;
  }
 
-
+/*
+konec interpretu
+*/
  int interpretEnd() {
      VTdispose(&globalTable);
      VSdispose(tableStack);
@@ -241,7 +236,9 @@ int treePass(tTNodePtr trP)
      return 0;
  }
 
- 
+/*
+allokace pameti
+*/ 
  char *mallocString(char *s) {
      char* temp = malloc(sizeof(char)*(strlen(s)+1));
      strcpy(temp, s);
@@ -249,6 +246,9 @@ int treePass(tTNodePtr trP)
  }
 
 
+/*
+vlozi interni funkce do globalni tabulky
+*/
  void addInternalFunctions(varTable table) {
      VTinsert(table, mallocString("ifj16.readInt"), 1, NULL);
      VTinsert(table, mallocString("ifj16.readDouble"), 2, NULL);
@@ -271,17 +271,22 @@ int treePass(tTNodePtr trP)
  */
  void fGInsert(tTNodePtr root, char *s) {
 
+     // veme id a prida k nemu "." a jmeno tridy 
      char *temp = getID((root->LPtr)->RPtr);
      char *joined = malloc(sizeof(char)*(strlen(s)+strlen(temp)+2));
      strcpy(joined, s);
      joined = strcat(joined, ".");
      joined = strcat(joined, temp);
+
+     //vyhodnoti datovy typ funkce
      int ftype = 0; 
      switch (((root->LPtr)->LPtr)->key) { 
          case INT_DATA: ftype = 1; break;
          case DOUBLE_DATA: ftype = 2; break;
          case STRING_DATA: ftype = 3; break;
      }
+
+     //vlozi do tabulky polozku funkce
      VTinsert(globalTable, joined, ftype, NULL);
  }
 
@@ -294,17 +299,22 @@ int treePass(tTNodePtr trP)
  */
   void sGInsert(tTNodePtr root, char *s) {
 
+     // veme id a prida k nemu "." a jmeno tridy
      char *temp = getID((root->LPtr)->RPtr);
      char *joined = malloc(sizeof(char)*(strlen(s)+strlen(temp)+2));
      strcpy(joined, s);
      joined = strcat(joined, ".");
      joined = strcat(joined, temp);
+
+     //vyhodnoti datovy typ funkce
      int vtype = 0; 
      switch (((root->LPtr)->LPtr)->key) { 
          case INT_DATA: vtype = 4; break;
          case DOUBLE_DATA: vtype = 5; break;
          case STRING_DATA: vtype = 6; break;
      }
+    
+     //vyhodnoti vyraz 
      void *ptr = evaluate(root->RPtr, vtype);    
      VTinsert(globalTable, joined, vtype, ptr);
  }
@@ -335,8 +345,10 @@ projde strom a vytvoří položku v globalTable pro každou funkci a proměnnou
 /*
 vyhledá ve stromu vstupní uzel funkce
 */
- tTNodePtr findEntryPoint(tTNodePtr root, char *c, char *f) { 
- char *s =NULL;
+ tTNodePtr findEntryPoint(tTNodePtr root, char *c, char *f) {
+
+//rozdeli plne kvantifikovany identifikator na jmeno funkce a promenne  
+ char *s = NULL;
  if (f == NULL) {
      int i = 0;
      f = strchr(c, 46) + 1;
@@ -355,8 +367,7 @@ vyhledá ve stromu vstupní uzel funkce
  while (temp != NULL) {  
      other_temp = temp->LPtr;
      char *ID = getID(other_temp->LPtr);
-     if (!strcmp(ID, s)) {
-         
+     if (!strcmp(ID, s)) {       
          other_temp = other_temp->RPtr; 
          while (other_temp != NULL) {
              ID = getID(((other_temp->LPtr)->LPtr)->RPtr);
@@ -412,6 +423,8 @@ rekurzivní vyhodnocení výrazu typu int
  int intEvaluate(tTNodePtr root) {
      int temp = 0;
      int other_temp = 0;
+  
+     //vyhodnocuje vyraz (plus/minus)
      if (root->key == EXPRESSION) {
          if (root->LPtr != NULL) {
              temp = intEvaluate(root->LPtr);
@@ -432,6 +445,7 @@ rekurzivní vyhodnocení výrazu typu int
          }
      }
 
+     //vyhodnocuje term (krat/deleno)
      if (root->key == TERM) {
          if (root->LPtr != NULL) {
              temp = intEvaluate(root->LPtr);
@@ -452,10 +466,12 @@ rekurzivní vyhodnocení výrazu typu int
          }
      }
 
+     //literal
      if (root->key == INT) {
          return atoi(root->literal);
      }
 
+     //najde a vrati hodnotu promenne
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
@@ -465,7 +481,7 @@ rekurzivní vyhodnocení výrazu typu int
          }
      }
 
-
+     //zpracuje funkci
      if (root->key == CALL) {
          tableElemPtr help = functionCall(root);
          if (help != NULL) {   
@@ -484,6 +500,8 @@ rekurzivní vyhodnocení výrazu typu double
   double doubleEvaluate(tTNodePtr root) {
      double temp = 0;
      double other_temp = 0;
+    
+     //plus nebo minus
      if (root->key == EXPRESSION) {
          if (root->LPtr != NULL) {
              temp = doubleEvaluate(root->LPtr);
@@ -504,6 +522,7 @@ rekurzivní vyhodnocení výrazu typu double
          }
      }
 
+     //nasobeni nebo deleni
      if (root->key == TERM) {
          if (root->LPtr != NULL) {
              temp = doubleEvaluate(root->LPtr);
@@ -524,10 +543,12 @@ rekurzivní vyhodnocení výrazu typu double
          }
      }
 
+     //literal
      if (root->key == DOUBLE) {
          return strtod(root->literal, NULL);
      }
 
+     //vraci hodnotu promenne
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
@@ -537,6 +558,7 @@ rekurzivní vyhodnocení výrazu typu double
          }
      }
 
+     //vyhodnoti funkci
      if (root->key == CALL) {
          tableElemPtr temp = functionCall(root);
          if (temp != NULL) {
@@ -553,6 +575,8 @@ rekurzivní vyhodnocení výrazu typu string
  char *stringEvaluate(tTNodePtr root) {
      char *temp = NULL;
      char* other_temp = NULL;
+
+     // jenom plus
      if (root->key == EXPRESSION) {
          if (root->LPtr != NULL) {
              temp = stringEvaluate(root->LPtr);
@@ -575,12 +599,18 @@ rekurzivní vyhodnocení výrazu typu string
              }
          }
      }
-     if (root->key == STRING) {
+
+     //int nebo string literal
+     if (root->key == STRING || root->key == INT) {
          temp = malloc(sizeof(char)*(strlen(root->literal)+1));
          strcpy(temp, root->literal); 
          return temp;
      }
 
+    //todo double literal
+
+
+     //vrati hodnotu promenne
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
@@ -591,6 +621,7 @@ rekurzivní vyhodnocení výrazu typu string
          }
      } 
 
+     //vyhodnoti funkci
      if (root->key == CALL) {
          tableElemPtr temp = functionCall(root);
          if (temp != NULL) {
@@ -631,6 +662,8 @@ implementace funkce ifj16.print()
 univerzální funkce pro vykonání vnitřní funkce
 */
  int executeInternal(char *c, char *f, tTNodePtr parameters) {
+
+      //TODO
 
      tableElemPtr temp = VTsearch(globalTable, c); 
 
@@ -710,6 +743,8 @@ funkce pro volání funkce během běhu interpretu
 
 /*
 založí tabulku lokálních proměnných a přiřadí argumentům funkce jejich parametry
+
+zastarala //TODO
 */
  varTable makeFunctionTable(char *c, char*f, tTNodePtr arguments, tTNodePtr parameters) {
      tableElemPtr fElem = VTsearch(globalTable, c);
@@ -752,17 +787,16 @@ vytvoří lokální proměnnou
 
 /*
 provede volanou funkci
-prakticky hlavní tělo interpretu
-pro zavolanou funkci najde vstupní bod,
-vytvoří tabulku lokálních proměnných
-provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné 
+prakticky hlavní tělo interpretu 
 */
  int executeFunction(char *c, char *f, tTNodePtr parameters) {
+     //pro zavolanou funkci najde vstupní bod
      tTNodePtr start = findEntryPoint(derivationTree, c, f);  
      if (start == NULL) {
          return 10;
      }
      start = start->RPtr;
+     //vytvoří tabulku lokálních proměnnýc
      varTable localTable = makeFunctionTable(c, f, start->LPtr, parameters);
      VSpush(tableStack, localTable); 
      start = start->RPtr; 
@@ -770,6 +804,7 @@ provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné
          return 0;
      }
 
+     //provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné
      while (start->LPtr != NULL) {
          if ((start->LPtr)->key == LOCAL_VAR) {
              makeLocalVar(localTable, start->LPtr);
@@ -790,6 +825,9 @@ provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné
  }
 
 
+/*
+Provede statement
+*/
  int doStatement(tTNodePtr root) {
 
      switch (root->key) {
@@ -816,7 +854,9 @@ provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné
      return 0;
  }
 
-
+/*
+provede blok prikazu
+*/
  int doBlock (tTNodePtr root) {
      while (root != NULL) {
          if (root->LPtr == NULL) {
@@ -843,7 +883,9 @@ volání funkce a zahození její návratové hodnoty
      return 0;
  }
 
- 
+/*
+podminka
+*/ 
  int doCondition(tTNodePtr root) {
      tTNodePtr temp = root->RPtr;
      if (compare(root->LPtr)) {
@@ -860,7 +902,9 @@ volání funkce a zahození její návratové hodnoty
      return 0;
  }
 
-
+/*
+cyklus
+*/
  int doCycle(tTNodePtr root) {
      while (compare(root->LPtr)) {  
          int ret = doBlock(root->RPtr);
@@ -872,6 +916,9 @@ volání funkce a zahození její návratové hodnoty
  }
 
  
+/*
+return
+*/
  int doReturn (tTNodePtr root) {
      varTable localTable = VStop(tableStack);
      tableElemPtr help = VTsearch(globalTable, localTable->c);
@@ -879,7 +926,9 @@ volání funkce a zahození její návratové hodnoty
      return 1; 
  }
 
- 
+/*
+prirazeni do promenne
+*/ 
  int doAssignment(tTNodePtr root) {
      varTable localTable = VStop(tableStack);
      tableElemPtr help = VTsearch(localTable, getID(root->LPtr));
@@ -890,7 +939,9 @@ volání funkce a zahození její návratové hodnoty
      return 0;
  }
 
-
+/*
+vyhodnoceni porovnani
+*/
  double compare(tTNodePtr root) {
      double *temp = NULL;
      double *other_temp = NULL;
