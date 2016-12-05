@@ -50,6 +50,7 @@ int subtree_int_to_real(tTNodePtr* ptr){
             par_list->LPtr = id_p;
             par_list->RPtr = NULL;
             par_list->key = PAR_LIST;
+            par_list->literal = NULL;
 
             id_p->LPtr = (*ptr)->LPtr;
             id_p->RPtr = (*ptr)->RPtr;
