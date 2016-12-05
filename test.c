@@ -1,16 +1,51 @@
 #include "test.h"
 
-int main()
-{
+int main() {
+  printf("----------------------------------\n");
   testLexicalAnalysis();
+
+  //char takejNakejRetezec[100] = "Tak tohle je takovej malickej testovaci retezicek, pro pokusny vecicky!!!\n";
+  //printf("%s", takejNakejRetezec+2);
+
+  //for (int i=1; i < 256; i++)
+    //printf("\"\\%03o\"\n", i);
+
+  /*int c;
+  FILE *filePointer = fopen("ascii2.out", "r");
+
+  if (filePointer == NULL)
+    fprintf(stderr, "Error while trying to open the file!");
+  else {
+
+    for (int i=0; i < 255; i++) {
+      printf("Token[%d]:\ntype: %s\ndata: %c\n", i, getEnumeratorName(STRING_LITERAL), i+1);
+      printf("----------------------------------\n");
+    }
+    printf("Token[%d]:\ntype: %s\ndata: %s\n", 255, getEnumeratorName(END_OF_FILE), "(null)");
+    printf("----------------------------------\n");
+  }
+  fclose(filePointer);*/
+
+
+  /*
+  char *string1 = "Ahoj\nSve'te\\\042";
+  char *string2 = "Poser\t42\n85\\\\789\"///\001asd\377asd\378asd\42";
+
+  printf("%s\n", string1);
+  printf("%s\n", string2);
+
+  char string3[17] = { 'A', 'h', 'o', 'j', '\n', 'S', 'v', 'e', '\'', 't', 'e', '\\', '\\', '\\', '0', '4', '2' };
+  char string4[46] = { 'P', 'o', 's', 'e', 'r', '\t', '4', '2', '\n', '8', '5', '\\', '\\', '\\', '\\', '7', '8', '9', '\"', '/', '/', '/', '\\', '\0', '\0', '\1', 'a', 's', 'd', '\\', '3', '7', '7', 'a', 's', 'd', '\\', '3', '7', '8', 'a', 's', 'd', '\\', '4', '2' };
+
+  printf("%s\n", string3);
+  printf("%s\n", string4);
+  */
 
   return 0;
 }
 
-char *getEnumeratorName(TokenType type)
-{
-  switch (type)
-  {
+char *getEnumeratorName(TokenType type) {
+  switch (type) {
     case NOT_EQUAL_TO_OPERATOR: return "NOT_EQUAL_TO_OPERATOR"; // "!="
     case LEFT_PARENTHESIS: return "LEFT_PARENTHESIS"; // "("
     case RIGHT_PARENTHESIS: return "RIGHT_PARENTHESIS"; // ")"
@@ -54,8 +89,7 @@ char *getEnumeratorName(TokenType type)
   return NULL;
 }
 
-Token *newToken(TokenType type, char *data)
-{
+Token *newToken(TokenType type, char *data) {
   Token *t = getToken();
   t->type = type;
   t->data = data;
@@ -63,20 +97,17 @@ Token *newToken(TokenType type, char *data)
   return t;
 }
 
-void printToken(Token *t)
-{
+void printToken(Token *t) {
   printf("Token:\ntype: %s\ndata: %s\n\n", getEnumeratorName(t->type), t->data);
   return;
 }
 
-int stringToInteger(char *inputString)
-{
+int stringToInteger(char *inputString) {
   long int castedInteger;
   char *endPointer;
   errno = 0;
 
-  if (inputString[0] == '0')
-  {
+  if (inputString[0] == '0') {
     if (inputString[1] != '\0')
       castedInteger = strtol(inputString, &endPointer, 8);
     else
@@ -90,14 +121,12 @@ int stringToInteger(char *inputString)
   return (int)castedInteger;
 }
 
-void testBuffer(Buffer **b, char *bufferName)
-{
+void testBuffer(Buffer **b, char *bufferName) {
   int allocationOfBufferSucceeded = 0;
 
   printf("[Test] Buffer test:\n");
 
-  if (*b != NULL)
-  {
+  if (*b != NULL) {
     printf("[ OK ] Buffer \"%s\" was successfully allocated to the size of %u bytes\n", bufferName, (*b)->size * (*b)->multiplier);
     allocationOfBufferSucceeded++;
   }
@@ -106,8 +135,7 @@ void testBuffer(Buffer **b, char *bufferName)
 
   disposeBuffer(b);
 
-  if (allocationOfBufferSucceeded)
-  {
+  if (allocationOfBufferSucceeded) {
     if (*b == NULL)
       printf("[ OK ] Buffer \"%s\" was successfully deallocated\n", bufferName);
     else
@@ -119,27 +147,29 @@ void testBuffer(Buffer **b, char *bufferName)
   return;
 }
 
-void testLexicalAnalysis()
-{
+void testLexicalAnalysis() {
   int i = 0;
   Token *tokenArray[500];
 
   beginLexicalAnalysis();
 
-  do
-  {
+  do {
+    if (i > 0)
+      disposeToken(&(tokenArray[i-1]));
     tokenArray[i] = getToken();
-    printf("\n----------------------------------\n");
+    if (tokenArray[i] == NULL)
+      return;
     printf("Token[%d]:\ntype: %s\ndata: %s\n", i, getEnumeratorName(tokenArray[i]->type), tokenArray[i]->data);
-    printf("----------------------------------\n\n");
+    printf("----------------------------------\n");
   }
   while (tokenArray[i++]->type != END_OF_FILE);
+  if (tokenArray[--i]->type == END_OF_FILE)
+    disposeToken(&(tokenArray[i]));
 
   return;
 }
 
-void testPointerSizes()
-{
+void testPointerSizes() {
   char comparisonSign;
 
   printf("[Test] Void pointer size test:\n");
@@ -191,8 +221,21 @@ void testPointerSizes()
   return;
 }
 
-void testToken()
+/*
+void testString()
 {
+  Token *t;
+
+  beginLexicalAnalysis();
+
+  t = getToken();
+
+
+
+  return;
+}*/
+
+void testToken() {
   char *integerLiteral = "42";
   char *doubleLiteral = "3.1415";
   char *stringLiteral = "This is a string!";
