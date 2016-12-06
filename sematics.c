@@ -145,7 +145,7 @@ static inline int check_exist_function(IAL_HashTable *HTable, char *name){
       
       fullname = add_class_before_name (ActClass, name);
       if (fullname == NULL){
-            return (error == 99)? 99 : 3;
+            return (error == 99)? 99 : 2;
       } 
 
       item = IAL_htSearch(HTable, fullname);
@@ -182,7 +182,7 @@ int function_control(tTNodePtr ptr, IAL_HashTable *HTable){
       if (name == NULL){
             DStack (S);   
             IAL_htDispose(LHTable); 
-            return 99;       
+            return (error == 99) ? 99 : 2;       
       }
       item = IAL_htSearch(HTable, name);
       free(name);      
@@ -266,7 +266,7 @@ int st_list_control (tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTabl
                   load_typ (ptr->key, &typ); //load typ of var {I,D,S} to typ
                   if (typ == 'V'){
                         DStack (S);
-                        return 6;                  
+                        return 2;                  
                   }
                   types = add_typ_before_types ('P', &typ);
                   if (types == NULL){
@@ -498,6 +498,7 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
       char *name;
       int fspecial = 0;
       int i = 2;
+      int max;
       tStackPtr stack;      
       tStackPtr *S = &stack;
 
@@ -521,6 +522,7 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
             return 3;
       } 
       ftypes = item->types;
+      max = item->n;
       *returns = ftypes[1];
       
       do{
@@ -551,8 +553,8 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
                   }
 
                   if (!fspecial){
-                        //Control param type                  
-                        if (ftypes[i] != item->types[1]){
+                        //Control param type    
+                        if (i > max || ftypes[i] != item->types[1]){
                               DStack (S);
                               return 4;
                         }
@@ -563,6 +565,10 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
             //EXPRESSION
             if (ptr != NULL && ptr->key == EXPRESSION){
                   if (!fspecial){
+                        if (i > max){
+                              DStack(S);
+                              return 4;
+                        }
                         error = expression_control(ptr, HTable, LHTable, ftypes[i]);
                   }
                   else{
@@ -772,7 +778,7 @@ static inline int try_find_global_load_item(tTNodePtr ptr, IAL_HashTable *HTable
        if (item == NULL){
             fullname = add_class_before_name (ActClass, name);
             if (error != 0){                              
-                return error;
+                return (error == 99) ? 99 : 2;
             }                        
             item = IAL_htSearch(HTable, fullname);
             if (item == NULL){
@@ -938,7 +944,7 @@ int function_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable){
       if (name == NULL){
             free(types);
             DStack (S);      
-            return (error == 99) ? 99 : 3;       
+            return (error == 99) ? 99 : 2;       
       }
       ptr = STopPop (S);
       //FUNCTION 2
@@ -1001,7 +1007,7 @@ int static_var_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable
       if (typ == 'V'){
             free(types);
             DStack (S);
-            return 6;                  
+            return 2;                  
       }
       types = add_typ_before_types ('P', &typ);
       if (types == NULL){
@@ -1015,7 +1021,7 @@ int static_var_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable
       if (name == NULL){
             free(types);
             DStack (S);      
-            return (error == 99) ? 99 : 3;       
+            return (error == 99) ? 99 : 2;       
       }
       if (IAL_htSearch(HTable, name) == NULL){
             error = IAL_htInsert(HTable, name, i++, types);
