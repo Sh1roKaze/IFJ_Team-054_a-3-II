@@ -5,7 +5,7 @@ class Main
 	static void run()
 	{
 		int i1 = 0 -5;
-		int i2 = 077; //Okatalově zapsaná hodnota 63
+		int i2 = 63;
 
 		ifj16.print(i1);
 		ifj16.print(i2);

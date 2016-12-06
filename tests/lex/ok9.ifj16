@@ -12,7 +12,7 @@ class Main
 		s1 = "   Ahoj světe";
 		s3 = "Ahoj\nSve'te\\\0420";
 		int i1 = 0 -5;
-		int i2 = 077; //Okatalově zapsaná hodnota 63
+		int i2 = 63;
 		double d1 = 0;
 		d1 = 0.0;
 		d1 = d1 -0.1;

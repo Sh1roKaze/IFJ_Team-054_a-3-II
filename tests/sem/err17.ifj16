@@ -5,7 +5,7 @@ class Main
 		int i = 20;
 		String s = "20";
 
-		if (a != s)
+		if (i != s)
 		{
 			
 		}
