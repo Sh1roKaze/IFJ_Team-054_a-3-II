@@ -294,6 +294,12 @@ rekurzivní vyhodnocení výrazu typu int
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
+         if (temp == NULL) {
+             temp = VTsearch(globalTable, root->literal);
+         }
+         if (temp->val == NULL) {
+                 exit(8); 
+         } 
          if (temp != NULL) {
              int value = *((int*) temp->val);
              return value;
@@ -371,6 +377,12 @@ rekurzivní vyhodnocení výrazu typu double
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
+         if (temp == NULL) {
+             temp = VTsearch(globalTable, root->literal);
+         }
+         if (temp->val == NULL) {
+                 exit(8); 
+         }
          if (temp != NULL) {
              double value = *((double*) temp->val);
              return value;
@@ -430,7 +442,15 @@ rekurzivní vyhodnocení výrazu typu string
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
          tableElemPtr temp = VTsearch(localTable, root->literal);
+         if (temp == NULL) {
+             temp = VTsearch(globalTable, root->literal);
+         }
+
          if (temp != NULL) {
+             if (temp->val == NULL) {
+                 exit(8); 
+             }
+
              if (temp->type == 6) {
              char *value = malloc(sizeof(char)*(strlen((char*) temp->val)+1));
              strcpy(value, (char*) temp->val);
@@ -523,7 +543,7 @@ univerzální funkce pro vykonání vnitřní funkce
          }
          return ret;
      }
-     if (!strcmp(c, "ifj16.print")) {
+     if (!strcmp(c, "ifj16.print")) { 
          IFJ16_print(parameters);
          return 0;
      }
@@ -592,6 +612,11 @@ založí tabulku lokálních proměnných a přiřadí argumentům funkce jejich
          return temp;
      }
      
+     if (parameters->LPtr == NULL) {
+         return temp;
+
+     }
+ 
      //najde uzel s argumenty
      tTNodePtr arguments = findEntryPoint(derivationTree, c);
      arguments = arguments->RPtr;
@@ -641,8 +666,8 @@ prakticky hlavní tělo interpretu
      tTNodePtr start = findEntryPoint(derivationTree, c);  
      if (start == NULL) {
          return 10;
-     } 
-     start = start->RPtr;
+     }  
+     start = start->RPtr; 
      //vezme si svoji predvytvorenou tabulku lokalnich promennych
      //i s predanymi parametry
      varTable localTable = VStop(tableStack);
