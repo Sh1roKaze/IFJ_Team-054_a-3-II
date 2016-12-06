@@ -9,10 +9,9 @@ int hashCode (char *key, int size) {
 }
 
 
-varTable VTinit(char* c, char *f, int type, int size) {
+varTable VTinit(char* c, int type, int size) {
     varTable init = malloc(sizeof(struct tTable));
     init->c = c;
-    init->f = f;
     init->type = type;
     init->array = malloc(sizeof(struct tableElem)*size);
     init->size = size;
@@ -74,7 +73,6 @@ int VTinsert(varTable table, char *s, int type, void* value) {
 	 }
  }
  //free((*table)->c);
- //free((*table)->f); 
  free((*table)->array); 
  free(*table); 
   

@@ -21,7 +21,7 @@ typedef struct tTable {
 } *varTable;
 
 
-varTable VTinit(char *c, char *f, int type, int size);
+varTable VTinit(char *c, int type, int size);
 tableElemPtr VTsearch(varTable table, char *s);
 int VTinsert(varTable table, char *s, int type, void* value);
 void VTdispose(varTable *table);
@@ -45,10 +45,6 @@ int VSpop(varStack stack);
 void VSdispose(varStack stack);
 
 #endif
-
-
-
-
 
 
 
