@@ -15,6 +15,9 @@ varTable VTinit(char* c, int type, int size) {
     init->type = type;
     init->array = malloc(sizeof(struct tableElem)*size);
     init->size = size;
+    for (int i = 0; i < init->size; i++) {
+         (init->array)[i] = NULL;
+    }
     return init;
 }
 
@@ -74,9 +77,7 @@ int VTinsert(varTable table, char *s, int type, void* value) {
  }
  //free((*table)->c);
  free((*table)->array); 
- free(*table); 
-  
-
+ free(*table);
 }
 
 varStack VSinit() {
