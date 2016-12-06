@@ -5,12 +5,12 @@ dirs="lex synt sem int other"
 for dir in $dirs
 do
 	echo ""
-	echo "----------Testing module $dir----------"
+	echo "====================Testing module $dir===================="
+	echo ""
 	tests=`find tests/$dir | grep .ifj16$ | sort`
 	for i in $tests
 	do
 		# Spustí program
-		echo ""
 		echo "Runing $i"
 		./ifj16_team54 $i <$i.in >$i.out
 
@@ -33,5 +33,7 @@ do
 			echo "$i: Incorrect output data"
 			echo "$i.out saved"
 		fi
+
+		echo ""
 	done
 done
