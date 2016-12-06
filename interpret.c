@@ -231,7 +231,6 @@ vyhodnotí výraz typu zadaného pomocí "etype"
              return (void*) other_temp;  
          case 3:
          case 6:
- 
              return (void*) stringEvaluate(root); 
      }
 
@@ -302,13 +301,13 @@ rekurzivní vyhodnocení výrazu typu int
      }
 
      //zpracuje funkci
-     if (root->key == CALL) {
+     if (root->key == CALL) { 
          tableElemPtr help = functionCall(root);
-         if (help != NULL) {   
+         if (help != NULL) {  
              int value = *((int*) help->val);
              free(help->val);   
              return value;
-         } else {
+         } else { 
              return 0; 
          }
      }
@@ -465,7 +464,7 @@ rekurzivní vyhodnocení výrazu typu string
 relativně rychlé určení zda je volaná funkce vnitřní nebo ne
 */
  int isInternal(char *s) {
-     if (strspn(s, "ifj16.") == 6) {
+     if (strstr(s,"ifj16.") != NULL) {
          return 1;
      } else {
          return 0;
@@ -628,7 +627,7 @@ vytvoří lokální proměnnou
          case DOUBLE_DATA: vtype = 5; break;
          case STRING_DATA: vtype = 6; break;
      }
-     void *value = evaluate(root->RPtr, vtype);  
+     void *value = evaluate(root->RPtr, vtype); 
      VTinsert(localTable, c, vtype, value); 
  }
 
