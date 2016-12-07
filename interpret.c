@@ -1,4 +1,5 @@
 #include "interpret.h"
+#include <math.h>
 
 //HERE ARE LIONS
  int interpret(); 
@@ -283,6 +284,8 @@ rekurzivní vyhodnocení výrazu typu int
              if (!strcmp(root->literal,"*")) {
                  return temp * other_temp;
              } else {
+                 if (other_temp == 0)
+                     exit(9);
                  return temp / other_temp;
              }
          }
@@ -366,6 +369,8 @@ rekurzivní vyhodnocení výrazu typu double
              if (!strcmp(root->literal,"*")) {
                  return temp * other_temp;
              } else {
+                 if (fabs(other_temp) < 10e-7)
+                     exit(9); 
                  return temp / other_temp;
              }
          }
