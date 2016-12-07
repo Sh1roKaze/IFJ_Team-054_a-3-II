@@ -848,6 +848,11 @@ int literal(tTNodePtr tree) {
     if (token == NULL) {
         return 2;
     }
+
+    if (!accept(STRING_LITERAL) && !accept(INT_LITERAL) && !accept(DOUBLE_LITERAL)) {
+        return 2;
+    }
+
     tree->literal = malloc(sizeof(char)*strlen(token->data)+1);
     strcpy(tree->literal, token->data);
     if (accept(STRING_LITERAL)) {
@@ -863,7 +868,6 @@ int literal(tTNodePtr tree) {
         tree->key = DOUBLE;
         return 0;
     }
-    return 2;
 }
 
 
@@ -914,6 +918,7 @@ int comparison(tTNodePtr tree) {
     if (ret == 2) {
         return 2;
     }
+   
     if (accept(RIGHT_PARENTHESIS)) {
         return 0;
     }
