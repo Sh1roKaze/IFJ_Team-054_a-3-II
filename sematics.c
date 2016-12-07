@@ -683,14 +683,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             ptr = STopPop (S);
             //EXPRESSION  
             if (ptr != NULL){
-                  printf("%s\n","EXPRESSION");
                   while (ptr->key == EXPRESSION){
                         //Check mark for konkatenace
                         if (typ == 'S' && ptr->literal != NULL){
-                        printf("%s\n",ptr->literal);
                               if (mark == NULL || mark[0] == '+'){
                                     mark = ptr->literal;
-                                    printf("%c\n",mark[0]);
                               }
                         }          
                         ptr = push_right_go_left (ptr, S);
@@ -698,18 +695,17 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
              }
                     
             //TERM
-            if (ptr != NULL && ptr->key == TERM)
-                  printf("%s\n","TERM");
+            if (ptr != NULL && ptr->key == TERM){
                   //Check mark for konkatenace      
                   if (typ == 'S' && ptr->literal != NULL){
                         mark = ptr->literal;     
-                        printf("%s\n",mark);
-                  }     
-                  ptr = push_right_go_left (ptr, S);
+                  }   
+                  if (ptr->RPtr != NULL)  
+                        SPush (S, ptr->RPtr);
+            }
 
             //CALL
             if (ptr != NULL && ptr->key == CALL){
-                  printf("%s\n","CALL");
                   //Call in inicialization static var
                   if (var_rank != 0){
                         DStack(S);
@@ -756,7 +752,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
             //ID
             if (ptr != NULL && ptr->key == ID){
-                  printf("%s\n","ID");
                   name = ptr->literal;
                   //Try find variable
                   if (LHTable != NULL){//Try find local
@@ -790,7 +785,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   tvar = (item->types)[1];
                   //Check type for String
                   if (typ == 'S'){
-                        printf("%d\n",-1);
                         error = string_control(mark, tvar);
                         if (error != 0){
                               DStack(S);
@@ -798,7 +792,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         }                             
                   }
                   else{
-                        printf("%d\n",99);
                         //Check type for other
                         if (tvar != typ){
                               if (typ == 'D' && tvar == 'I'){
@@ -818,7 +811,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                             
             //LITERAL
             if (ptr != NULL && (ptr->key == STRING || ptr->key == INT || ptr->key == DOUBLE) ){
-                  printf("%s\n","LITERAL");
                   load_typ_literal (ptr->key, &tvar);
 
                   //Check type for String
@@ -853,9 +845,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 }
 
 static inline int string_control(char *mark, char typ){
-      printf("%d\n",0);
       if (mark != NULL){      
-            printf("%d\n",1);
             if (mark[0] != '+')
                   return 4;                 
             if (typ == 'V')
