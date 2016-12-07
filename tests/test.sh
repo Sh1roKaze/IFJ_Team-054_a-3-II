@@ -11,29 +11,40 @@ do
 	for i in $tests
 	do
 		# Spustí program
-		echo "Runing $i"
-		./ifj16_team54 $i <$i.in >$i.out
+		err=0
+		./ifj16_team54 $i <$i.in >$i.out 2>/dev/null
 
 		# Vyhodnotí návratovou hodnotu
 		ret=$?
 		ref=`cat $i.ret`
 		if [ $ret -eq $ref ]
 		then
-			echo "Returned $ret - OK"
+			res="Returned $ret - OK"
 		else
-			echo "Returned $ret instead of $ref!!!"
+			res="Returned $ret - should return $ref!!!"
+			err=1
 		fi
 
 		# Vyhodnotí výstup
 		if diff $i.out $i.output >/dev/null
 		then
-			echo "$i: Output OK"
+			out="Output OK"
 			rm "$i.out"
 		else
-			echo "$i: Incorrect output data"
-			echo "$i.out saved"
+			out="Incorrect output data.\n$i.out saved."
+			err=1
 		fi
-
-		echo ""
+		
+		# Vypíše výsledek
+		if [ $err -eq 0 ]
+		then
+			echo "$i - OK"
+		else
+			echo ""
+			echo $i
+			echo $res
+			echo $out
+			echo ""
+		fi
 	done
 done
