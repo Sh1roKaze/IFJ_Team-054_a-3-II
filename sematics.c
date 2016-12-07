@@ -34,6 +34,7 @@ static inline char* add_typ_before_types (char typ, char *types);
 static inline char *add_char_behind_types (char *types, char c);
 static inline int check_exist_function(IAL_HashTable *HTable, char *name);
 static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
+static inline int string_control(char *mark, char typ);
 
 //build structure for call function int to real, repleace int in tree
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -610,8 +611,8 @@ int print_expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable
       tStackPtr stack;      
       tStackPtr *S = &stack;
       char returns;
-      char *name;
-      
+      char *name;      
+
       SInit (S);
       SPush (S, ptr);
       
@@ -619,7 +620,7 @@ int print_expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable
             ptr = STopPop (S);
             //EXPRESSION  
             if (ptr != NULL){
-                  while (ptr->key == EXPRESSION){          
+                  while (ptr->key == EXPRESSION){      
                         ptr = push_right_go_left (ptr, S);
                   }           
              }
@@ -672,8 +673,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       tStackPtr *S = &stack;
       char returns;
       char *name;
-      char *fullname;
       char tvar; 
+      char *mark = NULL;
       
       SInit (S);
       SPush (S, ptr);
@@ -682,14 +683,26 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             ptr = STopPop (S);
             //EXPRESSION  
             if (ptr != NULL){
-                  while (ptr->key == EXPRESSION){          
+                  while (ptr->key == EXPRESSION){
+                        //Check mark for konkatenace
+                        if (typ == 'S' && ptr->literal != NULL){
+                              if (mark == NULL || mark[0] == '+'){
+                                    mark = ptr->literal;
+                              }
+                        }          
                         ptr = push_right_go_left (ptr, S);
                   }           
              }
                     
             //TERM
-            if (ptr != NULL && ptr->key == TERM)          
-                  ptr = push_right_go_left (ptr, S);
+            if (ptr != NULL && ptr->key == TERM){
+                  //Check mark for konkatenace      
+                  if (typ == 'S' && ptr->literal != NULL){
+                        mark = ptr->literal;     
+                  }   
+                  if (ptr->RPtr != NULL)  
+                        SPush (S, ptr->RPtr);
+            }
 
             //CALL
             if (ptr != NULL && ptr->key == CALL){
@@ -704,23 +717,37 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         return error;
                   }
 
-                  //Check return typ of function                  
-                  if (returns != typ){
-                        if (typ == 'D' && returns == 'I'){
-                              error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                              if (error != 0){
-                                    DStack (S);
-                                    return error;
+                  //Check return typ of function for S  
+                  if (typ == 'S'){
+                        error = string_control(mark, returns);
+                        if (error != 0){
+                              DStack(S);
+                              return error;
+                        }                             
+                  }
+                  else{     
+                        //Check return typ of function for other            
+                        if (returns != typ){
+                              if (typ == 'D' && returns == 'I'){
+                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                    if (error != 0){
+                                          DStack (S);
+                                          return error;
+                                    }
                               }
-                        }
-                        else{
-                            
-                              if (returns != 'V'){
+                              else{     
                                     DStack (S);
-                                    return 4;
+                                    //Bad type return
+                                    if (returns != 'V'){
+                                          return 4;
+                                    }
+                                    //Try get return from void
+                                    else{
+                                          return 8;     
+                                    }
                               }
-                        }
-                  }                   
+                        }    
+                  }               
             }
 
             //ID
@@ -756,43 +783,81 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   }
                         
                   tvar = (item->types)[1];
-                  if (tvar != typ){
-                        if (typ == 'D' && tvar == 'I'){
-                              error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                              if (error != 0){
-                                    DStack (S);
-                                    return error;
+                  //Check type for String
+                  if (typ == 'S'){
+                        error = string_control(mark, tvar);
+                        if (error != 0){
+                              DStack(S);
+                              return error;
+                        }                             
+                  }
+                  else{
+                        //Check type for other
+                        if (tvar != typ){
+                              if (typ == 'D' && tvar == 'I'){
+                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                    if (error != 0){
+                                          DStack (S);
+                                          return error;
+                                    }
                               }
+                              else{
+                                    DStack (S);
+                                    return 4;
+                              }       
                         }
-                        else{
-                              DStack (S);
-                              return 4;
-                        }       
                   }
             }          
                             
             //LITERAL
             if (ptr != NULL && (ptr->key == STRING || ptr->key == INT || ptr->key == DOUBLE) ){
                   load_typ_literal (ptr->key, &tvar);
-                  
-                  if (tvar != typ){
-                        if (typ == 'D' && tvar == 'I'){
-                              error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                              if (error != 0){
-                                    DStack (S);
-                                    return error;
+
+                  //Check type for String
+                  if (typ == 'S'){
+                        error = string_control(mark, tvar);
+                        if (error != 0){
+                              DStack(S);
+                              return error;
+                        }                             
+                  }
+                  else{
+                        //Check type for other
+                        if (tvar != typ){
+                              if (typ == 'D' && tvar == 'I'){
+                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                    if (error != 0){
+                                          DStack (S);
+                                          return error;
+                                    }
                               }
-                        }
-                        else{
-                              DStack (S);
-                              return 4;
-                        }  
-                  }                          
+                              else{
+                                    DStack (S);
+                                    return 4;
+                              }  
+                        }    
+                  }                      
             }
 
       }while (!SEmpty (S));
 
       return 0;            
+}
+
+static inline int string_control(char *mark, char typ){
+      if (mark != NULL){      
+            if (mark[0] != '+')
+                  return 4;                 
+            if (typ == 'V')
+                  return 8;
+      }
+      else{
+            if (typ == 'V')
+                  return 8;
+            if (typ != 'S')
+                  return 4;
+      }
+      return 0;
 }
 
 static inline int try_find_global_load_item(tTNodePtr ptr, IAL_HashTable *HTable, char *name){
