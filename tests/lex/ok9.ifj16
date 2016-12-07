@@ -8,6 +8,8 @@ class Main
 		String s1 = ""; // /**/*/ Toto je komentář na jeden řádek
 		String _s2 = "neprazdny text";
 		String s3;
+		$_Str_1 = "\n Blabla";
+		Main.$_Str_1 = "\n Nazdar\n";
 		_s2 = "!\n";
 		s1 = "   Ahoj světe";
 		s3 = "Ahoj\nSve'te\\\0420";
@@ -21,7 +23,7 @@ class Main
 		d1 = 1e-2;
 		d1 = 1E+2;
 		d1 = 1.5E+2;
-		d1 = 01.5E+01; // V d1 by měla být hodnota 15.0
+		d1 = 01.5E+01; // V d1 by měla být hodnota 15
 		
 		
 		ifj16.print(s1);

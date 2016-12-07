@@ -8,6 +8,6 @@ class Main
     static int func()
     {
         int i = 5;
-        return a;
+        return i;
     }
 }
