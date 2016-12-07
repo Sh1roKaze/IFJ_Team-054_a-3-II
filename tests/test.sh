@@ -12,7 +12,7 @@ do
 	do
 		# Spustí program
 		err=0
-		./ifj16_team54 $i <$i.in >$i.out 2>/dev/null
+		./ifj16_team54 $i <$i.in >$i.out 2>$i.err
 
 		# Vyhodnotí návratovou hodnotu
 		ret=$?
@@ -44,7 +44,9 @@ do
 			echo $i
 			echo $res
 			echo $out
+			cat $i.err
 			echo ""
 		fi
+		rm $i.err
 	done
 done

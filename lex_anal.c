@@ -352,7 +352,7 @@ State stringLiteralOctalEscapeSequence() { //printf("[currentState] STRING LITER
 }
 
 State stringLiteralOctalEscapeSequenceFinish() { //printf("[currentState] STRING LITERAL OCTAL ESCAPE SEQUENCE FINISH: %c\n", currentCharacter);
-  if (!currentCharacterMatchRange('0', '7')) {
+  if (!currentCharacterMatchRange('0', '7') || (currentCharacter == '0' && mainBuffer->array[mainBuffer->position - 1] == '0' && mainBuffer->array[mainBuffer->position - 2] == '0')) {
     printErrorMessageAndPrepareForExiting("string contains invalid escape sequence", 1);
     return;
   }
@@ -478,7 +478,7 @@ char currentCharacterMatchString(char *string) {
 }
 
 char currentCharacterMatchWhitespace() {
-  return currentCharacterMatchString(" \n\t");
+  return currentCharacterMatchString(" \n\t\r"); // remove '\r' !!!!!!
 }
 
 // functions - token ADT
