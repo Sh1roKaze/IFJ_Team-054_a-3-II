@@ -493,9 +493,9 @@ relativně rychlé určení zda je volaná funkce vnitřní nebo ne
 
 //pomocná funkce pro zpracování argumentání při volání ifj16.substr();
  void substrHelp(tTNodePtr root, int *a, int *b) {
-     *a = atoi((root->LPtr)->literal);
+     *a = intEvaluate(root->LPtr);
      root = root->RPtr;
-     *b = atoi((root->LPtr)->literal);
+     *b = intEvaluate(root->LPtr);
  }
 
 /*
@@ -556,7 +556,14 @@ univerzální funkce pro vykonání vnitřní funkce
          int *i = malloc(sizeof(int));
          int *n = malloc(sizeof(int));
          substrHelp(parameters->RPtr, i, n);
-         IFJ16_substr(stringEvaluate(parameters->LPtr), *i, *n, (char*) temp->val);
+         temp->val = (void*) malloc(sizeof(char)*(strlen(stringEvaluate(parameters->LPtr))+1));  
+         ret = IFJ16_substr(stringEvaluate(parameters->LPtr), *i, *n, (char*) temp->val); 
+         if (ret == 1) {
+             exit(8);
+         }
+         if (ret == 10) {
+             exit(10);
+         }
          return 0;
      }
      if (!strcmp(c, "ifj16.compare")) {
@@ -592,7 +599,7 @@ funkce pro volání funkce během běhu interpretu
      if (isInternal(getID(root->LPtr))) {
          ret = executeInternal(getID(root->LPtr), root->RPtr);
      } else {
-         VSpush(tableStack, makeFunctionTable(getID(root->LPtr), root->RPtr)); 
+         VSpush(tableStack, makeFunctionTable(getID(root->LPtr), root->RPtr));
          ret = executeFunction(getID(root->LPtr));
      }
      
@@ -604,19 +611,16 @@ založí tabulku lokálních proměnných a přiřadí argumentům funkce jejich
 
 */
  varTable makeFunctionTable(char *c, tTNodePtr parameters) {
-
     //zalozi prazdnou tabulku lokalnich promennych, pokud fce nema parametry, skonci 
      tableElemPtr fElem = VTsearch(globalTable, c);
      varTable temp = VTinit(c, fElem->type, 101);
      if (parameters == NULL) {
          return temp;
      }
-     
-     if (parameters->LPtr == NULL) {
+     if (parameters->LPtr == NULL) { 
          return temp;
-
      }
- 
+
      //najde uzel s argumenty
      tTNodePtr arguments = findEntryPoint(derivationTree, c);
      arguments = arguments->RPtr;
@@ -662,20 +666,31 @@ prakticky hlavní tělo interpretu
 */
  int executeFunction(char *c) {
      int ret = 0;
+     tableElemPtr temp = VTsearch(globalTable, c);
+
      //pro zavolanou funkci najde vstupní bod
      tTNodePtr start = findEntryPoint(derivationTree, c);  
      if (start == NULL) {
          return 10;
-     }  
-     start = start->RPtr; 
+     }   
+     start = start->RPtr;
      //vezme si svoji predvytvorenou tabulku lokalnich promennych
      //i s predanymi parametry
-     varTable localTable = VStop(tableStack);
+     varTable localTable = VStop(tableStack); 
      start = start->RPtr; 
      if ( start->LPtr == NULL) {
+         if (ret) {
+             if (temp->type == 0) {
+                  if (temp->val != NULL) 
+                      exit(10);
+             }
+         } else {
+             if (temp->type != 0) 
+                 exit(10);
+         }
          return ret;
      }
-
+ 
      //provádí jednotlivé uzly STATEMENT nebo zakládá nové lokální proměnné
      while (start->LPtr != NULL) {
          if ((start->LPtr)->key == LOCAL_VAR) {
@@ -692,7 +707,18 @@ prakticky hlavní tělo interpretu
              break;
          }  
      }
-     VSpop(tableStack); 
+
+     VSpop(tableStack);
+
+     if (ret) {
+         if (temp->type == 0) {
+             if (temp->val != NULL) 
+                  exit(10);
+         }
+     } else {
+         if (temp->type != 0)
+             exit(10);
+     } 
      return ret;  
  }
 
@@ -702,28 +728,28 @@ Provede statement
 */
  int doStatement(tTNodePtr root) {
 
+     int ret = 0;
      switch (root->key) {
          case BLOCK_LIST:
-             doBlock(root);
+             ret = doBlock(root);
              break;
          case CONDITION:
-             doCondition(root);
+             ret = doCondition(root);
              break;
          case CYCLE:
-             doCycle(root);
+              ret = doCycle(root);
              break;
          case CALL:
-             doCall(root); 
+             ret = doCall(root); 
              break;
          case RETURN:
-             doReturn(root);
-             return 1; 
+             ret = doReturn(root); 
              break;
          case ASSIGNMENT:
-             doAssignment(root);
+             ret = doAssignment(root);
              break;     
      }
-     return 0;
+     return ret;
  }
 
 /*
