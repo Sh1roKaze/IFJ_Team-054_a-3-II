@@ -45,8 +45,8 @@ do
 			echo $res
 			echo $out
 			cat $i.err
-			rm $i.err
 			echo ""
 		fi
+		rm $i.err
 	done
 done
