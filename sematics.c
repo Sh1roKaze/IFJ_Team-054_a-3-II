@@ -9,6 +9,7 @@ int DetectStackError;
 static char *ActClass;
 static int error = 0;
 static IAL_htItem *item = NULL;
+static int var_rank = 0;
 
 //Prototypes
 int subtree_int_to_real(tTNodePtr* ptr);
@@ -77,6 +78,7 @@ int sematics(tTNodePtr ptr, IAL_HashTable *HTable){
       tStackPtr stack;      
       tStackPtr *S = &stack;      
       char typ;
+      int rate = 0;
 
       error = load_inner (HTable);
       if (error != 0){
@@ -100,6 +102,7 @@ int sematics(tTNodePtr ptr, IAL_HashTable *HTable){
             if (ptr != NULL && ptr->key == CLASS){
                   ptr = push_right_go_left (ptr, S);
                   ActClass = ptr->literal;
+                  rate = 0;
                   continue;          
             }
             //CLASS_ITEM
@@ -109,6 +112,8 @@ int sematics(tTNodePtr ptr, IAL_HashTable *HTable){
             }
             //STATIC_VAR
             if (ptr != NULL && ptr->key == STATIC_VAR){
+                  rate++;
+                  var_rank = rate;
                   ptr = push_right_go_left (ptr, S);
                   //DECLARATION
                   ptr = ptr->LPtr;
@@ -123,6 +128,7 @@ int sematics(tTNodePtr ptr, IAL_HashTable *HTable){
                               return error;                        
                         }     
                   }
+                  var_rank = 0;
             }
             //FUNCTION
             if (ptr != NULL && ptr->key == FUNCTION){
@@ -458,6 +464,10 @@ int statement_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTab
       if (ptr->key == RETURN){
             ptr = ptr->LPtr;
             if (ptr != NULL){
+                  if (ftypes[1] == 'V'){
+                        DStack(S);
+                        return 4;
+                  }
                   error = expression_control(ptr, HTable, LHTable, ftypes[1]);
                   if (error != 0){
                         DStack (S);      
@@ -683,6 +693,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
             //CALL
             if (ptr != NULL && ptr->key == CALL){
+                  //Call in inicialization static var
+                  if (var_rank != 0){
+                        DStack(S);
+                        return 6;
+                  }
                   error = call_control(ptr, HTable, LHTable, &returns);
                   if(error != 0){
                         DStack (S);
@@ -725,12 +740,21 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               DStack (S);
                               return error;
                         }
+
+                        //Static var in inicialization static var
+                        if (var_rank != 0){
+                              if (item->index >= var_rank){
+                                    DStack(S);
+                                    return 6;
+                              }
+                        }
                   }
                   
                   if ( (item->types)[0] != 'P'){
                         DStack (S);
                         return 3;
-                  }      
+                  }
+                        
                   tvar = (item->types)[1];
                   if (tvar != typ){
                         if (typ == 'D' && tvar == 'I'){
@@ -994,7 +1018,7 @@ int static_var_htinsert(tTNodePtr *original, tStackPtr *S, IAL_HashTable *HTable
       char typ;
       char *types = NULL;
       char *name = NULL;
-      int i = 0;    
+      int i = 1;    
       tTNodePtr ptr; 
 
       ptr = *original;
