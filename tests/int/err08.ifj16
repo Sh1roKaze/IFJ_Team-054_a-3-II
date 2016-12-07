@@ -3,5 +3,6 @@ class Main
 	static void run()
 	{
 		double d = 5.0 / 0;
+		ifj16.print(d);
 	}
 }

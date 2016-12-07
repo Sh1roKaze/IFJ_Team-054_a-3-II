@@ -46,6 +46,9 @@
      VSpush(tableStack, makeFunctionTable("Main.run", NULL)); //vytvori prazdnou tabulku lokalnich promennych pro Main.run 
      int ret = executeFunction("Main.run"); //začne vykonávat funkci Main.run
      interpretEnd();                     //deinicializuje všechny tabulky proměnných 
+     if (ret == 1) {
+         ret = 0;
+     }
      return ret;
  }
 
