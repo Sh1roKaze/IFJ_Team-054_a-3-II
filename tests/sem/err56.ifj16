@@ -1,0 +1,10 @@
+class Main
+{
+	static String a;   
+	static void run(f2()) { }
+
+	static int f2()
+	{
+		return 2;
+	}
+}

@@ -1,0 +1,8 @@
+class Main
+{
+	static String a;   
+	static void run()
+	{
+		while("a" + a) { }
+	}
+}

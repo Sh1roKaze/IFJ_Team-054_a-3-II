@@ -1,0 +1,8 @@
+class Main
+{
+	static void run() { }
+
+	static void a(int run) { }
+}
+
+//3

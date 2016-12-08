@@ -1,0 +1,9 @@
+class Main
+{
+	static void run()
+	{
+		int a = func();
+	}
+
+	static int func() { }
+}

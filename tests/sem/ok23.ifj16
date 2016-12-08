@@ -1,0 +1,22 @@
+class Main
+{
+	static void run() { }
+}
+
+class M
+{
+	static int s = 1;
+	static int run()
+	{
+		Main.run();            
+	}
+}
+
+class Ma
+{
+	static int x = M.s;
+	static void run()
+	{
+		M.run();   
+	}
+}

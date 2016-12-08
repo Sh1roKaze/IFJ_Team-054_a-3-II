@@ -1,0 +1,15 @@
+class Main
+{
+	static String c = "AA";
+	static void run()
+	{
+		String a = "AA";
+		String b = a + "C";
+	}
+
+	static void f2(String v)
+	{
+		f2(v + "a");
+		c = v + 1;
+	}
+}

@@ -1,0 +1,10 @@
+class Main
+{
+	static int a = 1;
+
+	static void run()
+	{
+		a = Main.a;
+		String a = 1;
+	}
+}

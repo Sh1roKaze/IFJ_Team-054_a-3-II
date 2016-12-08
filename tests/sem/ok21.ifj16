@@ -1,0 +1,12 @@
+class Main
+{
+	static int a = 1;
+	static void run()
+	{
+		int a = 2;
+		ifj16.print(a + "\n");
+		ifj16.print(Main.a + "\n");
+	}
+}
+
+

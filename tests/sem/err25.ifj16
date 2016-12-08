@@ -1,0 +1,9 @@
+class Main
+{
+	static void run() { }
+
+	static int a;
+	static int b = a;
+}
+
+//8

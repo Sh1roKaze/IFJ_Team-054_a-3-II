@@ -1,0 +1,16 @@
+class Main
+{
+	static String a;   
+	static void run()
+	{
+		int c = 1;      
+		if(1<1)
+		{
+			c = 11111;                  
+		}
+		else
+		{
+			a = 1;
+		}       
+	}
+}

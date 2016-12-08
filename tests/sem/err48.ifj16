@@ -1,0 +1,10 @@
+class Main
+{
+	static String c;
+
+	static void run()
+	{
+		if("a" < c) { }
+		else { }
+	}
+}

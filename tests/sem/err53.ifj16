@@ -1,0 +1,9 @@
+class Main
+{
+	static String a = "u";   
+	static void run()
+	{
+		String c = "a";
+		c = c - a;
+	}
+}

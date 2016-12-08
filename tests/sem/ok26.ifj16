@@ -1,0 +1,12 @@
+class Main
+{
+	static String a = "Ahoj ";
+	static String b = "světe"; 
+	static String n = "!";    
+
+	static void run()
+	{
+		String k = a + Main.a + b + n + Main.b;
+		ifj16.print(k);
+	}
+}

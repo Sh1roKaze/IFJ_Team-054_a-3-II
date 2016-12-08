@@ -1,0 +1,23 @@
+class Main
+{
+	static void run()
+	{
+		int a = ifj16.readInt();
+		double b = ifj16.readDouble();
+		String c = ifj16.readString();
+		ifj16.print(a + " " + b + " " + c + "\n");
+		ifj16.print(1);
+		ifj16.print(1.1);
+		ifj16.print("a");
+		ifj16.print(1+1.1);
+		ifj16.print("aa" + 1 + "\n");
+		a = ifj16.length("aa");
+		c = ifj16.substr(c, a, 5);
+		a = ifj16.compare("aaa",c);
+		ifj16.print(a);
+		a = ifj16.find(c,"s");
+		ifj16.print(a);
+		c = ifj16.sort(c);
+		ifj16.print(c);
+	}
+}

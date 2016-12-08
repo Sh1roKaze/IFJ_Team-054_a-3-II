@@ -1,0 +1,9 @@
+class Main
+{
+	static String a;   
+	static void run()
+	{
+		String c = "ij";
+		a = "ahoj" * c;
+	}
+}
