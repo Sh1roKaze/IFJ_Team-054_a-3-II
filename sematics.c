@@ -728,9 +728,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
                         //Static var in inicialization static var
                         if (special > 0){
-                              if (item->index >= special){
-                                    DStack(S);
-                                    return 6;
+                              if (strstr(item->id, ActClass) == item->id){
+                                    if (item->index >= special){
+                                          DStack(S);
+                                          return 6;
+                                    }
                               }
                         }
                   }
