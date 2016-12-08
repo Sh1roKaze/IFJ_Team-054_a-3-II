@@ -3,6 +3,7 @@ class Main
 	static void run()
 	{
 		String s = "aa";
-		ifj16.substr(s, 0, -5);
+		int i = 0 - 5;
+		ifj16.substr(s, 0, i);
 	}
 }
