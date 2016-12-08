@@ -35,4 +35,4 @@ clean :
 	rm main.o sematics.o interpret.o stack.o mem_management.o ifj16.o ial.o lex_anal.o parser.o
 
 test : all
-	sh tests/test.sh
+	sh tests/test.sh | grep -v "ifj16 - OK$"
