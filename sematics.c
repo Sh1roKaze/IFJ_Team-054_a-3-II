@@ -819,7 +819,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       }
       else{
             //error for ("a" */- 1) only in ifj16.print
-            if (special < 0 && mark[0] != '+'){
+            if (special < 0 && mark != NULL && mark[0] != '+'){
                   return 4;
             }
             else{
