@@ -997,7 +997,15 @@ int load_static (tTNodePtr ptr, IAL_HashTable *HTable){
       
       IAL_htDispose(CHTable);
       //Check exist Main.run in file
-      return (IAL_htSearch(HTable, "Main.run") != NULL)? 0 : 3;     
+      item = IAL_htSearch(HTable, "Main.run");
+      if (item == NULL)
+            return 3;
+      
+      //Bad def run
+      if (strcmp(item->types,"FV\0") != 0)
+            return 4;
+      
+      return 0;     
 }      
 
 /*helping function for load static functional to HT*/
