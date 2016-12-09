@@ -50,7 +50,7 @@ int IFJ16_length(char *);
 // Returns 0 in case of succes
 //         1 in case of NULL params
 //         10 if substring is out of inputs range
-int IFJ16_substr(char *in, unsigned i, unsigned n, char *out);
+int IFJ16_substr(char *in, int i, int n, char *out);
 
 // Compare tvo strings (s1, s2)
 // Returns 0 if strings are equal
