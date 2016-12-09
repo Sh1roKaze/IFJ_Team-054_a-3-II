@@ -1,7 +1,6 @@
 #include "interpret.h"
 #include <math.h>
 
-//HERE ARE LIONS
  int interpret(); 
  int interpretEnd();
  char *mallocString(char *s);
@@ -141,8 +140,11 @@ vlozi interni funkce do globalni tabulky
          case STRING_DATA: vtype = 6; break;
      }
     
-     //vyhodnoti vyraz 
-     void *ptr = evaluate(root->RPtr, vtype);    
+     //vyhodnoti vyraz
+     void *ptr = NULL;
+     if (root->RPtr != NULL ) {
+         ptr = evaluate(root->RPtr, vtype);
+     }     
      VTinsert(globalTable, joined, vtype, ptr);
  }
 
@@ -303,9 +305,10 @@ rekurzivní vyhodnocení výrazu typu int
          if (temp == NULL) {
              temp = VTsearch(globalTable, root->literal);
          }
-         if (temp->val == NULL) {
+         if (temp != NULL && temp->val == NULL) {
                  exit(8); 
-         } 
+         }
+
          if (temp != NULL) {
              int value = *((int*) temp->val);
              return value;
@@ -388,7 +391,7 @@ rekurzivní vyhodnocení výrazu typu double
          if (temp == NULL) {
              temp = VTsearch(globalTable, root->literal);
          }
-         if (temp->val == NULL) {
+         if (temp != NULL && temp->val == NULL) {
                  exit(8); 
          }
          if (temp != NULL) {
@@ -564,8 +567,8 @@ univerzální funkce pro vykonání vnitřní funkce
          int *i = malloc(sizeof(int));
          int *n = malloc(sizeof(int));
          substrHelp(parameters->RPtr, i, n);
-         temp->val = (void*) malloc(sizeof(char)*(strlen(stringEvaluate(parameters->LPtr))+1));  
-         ret = IFJ16_substr(stringEvaluate(parameters->LPtr), *i, *n, (char*) temp->val); 
+         temp->val = (void*) malloc(sizeof(char)*(strlen(stringEvaluate(parameters->LPtr))+1)); 
+         ret = IFJ16_substr(stringEvaluate(parameters->LPtr), (unsigned) *i, (unsigned) *n, (char*) temp->val);
          if (ret == 1) {
              exit(8);
          }
@@ -694,7 +697,7 @@ prakticky hlavní tělo interpretu
              }
          } else {
              if (temp->type != 0) 
-                 exit(10);
+                 exit(8);
          }
          return ret;
      }
@@ -725,7 +728,7 @@ prakticky hlavní tělo interpretu
          }
      } else {
          if (temp->type != 0)
-             exit(10);
+             exit(8);
      } 
      return ret;  
  }
