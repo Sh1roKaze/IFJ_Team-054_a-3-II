@@ -200,8 +200,8 @@ int IFJ16_substr(char *in, int i, int n, char *out)
 		return 1;
 	if (strlen(in) < i + n || i < 0 || n < 0)
 	{
-		return 10;
 		out[0] = '\0';
+		return 10;
 	}
 
 	strncpy(out, in + i, n);
