@@ -2,7 +2,7 @@ class Main
 {
 	static void run()
 	{
-		int integer = func();
+		int i = func();
 	}
 
 	static int func()
