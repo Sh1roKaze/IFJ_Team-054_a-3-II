@@ -196,11 +196,13 @@ int IFJ16_length(char *s)
 //         10 if substring is out of inputs range
 int IFJ16_substr(char *in, int i, int n, char *out)
 {
-	out[0] = '\0';
 	if (in == NULL || out == NULL)
 		return 1;
 	if (strlen(in) < i + n || i < 0 || n < 0)
+	{
 		return 10;
+		out[0] = '\0';
+	}
 
 	strncpy(out, in + i, n);
 	out[n] = '\0';
