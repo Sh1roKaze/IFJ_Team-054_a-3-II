@@ -726,14 +726,17 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               return error;
                         }
 
-                        //Static var in inicialization static var
+                        //Static var in inicialization static var, error for later declaration static param in class
                         if (special > 0){
-                              if (strstr(item->id, ActClass) == item->id){
+                              name = add_class_before_name (ActClass, "\0");
+                              if (strstr(item->id, name) != NULL){
                                     if (item->index >= special){
+                                          free(name);
                                           DStack(S);
                                           return 6;
                                     }
                               }
+                              free(name);
                         }
                   }
                   
