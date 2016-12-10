@@ -37,7 +37,7 @@ static inline char* add_type_before_types (char typ, char *types);
 static inline char *add_char_behind_types (char *types, char c);
 static inline int check_exist_function(IAL_HashTable *HTable, char *name);
 static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
-static inline int string_control(char *mark, char typ);
+int string_control(char *types, char *marks, int special);
 
 /*build structure for call function int to real, replace int in tree to double*/
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -619,11 +619,12 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
 int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char typ , int special){
       tStackPtr stack;      
       tStackPtr *S = &stack;
-      char returns;
       char *name;
       char tvar; 
-      char *mark = NULL;
-      int string_found = 0;
+      char *marks = NULL;
+      char *types = NULL;
+      char *help = NULL;
+      int term = 0;
       
       SInit (S);
       SPush (S, ptr);
@@ -635,9 +636,12 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   while (ptr->key == EXPRESSION){
                         //Check mark for konkatenace
                         if (typ == 'S' && ptr->literal != NULL){
-                              if (mark == NULL || mark[0] == '+'){
-                                    mark = ptr->literal;
+                              if (ptr->literal[0] == '-'){
+                                    term = 2;
                               }
+                              help = add_type_before_types (ptr->literal[0], marks);
+                              free(marks);
+                              marks = help;      
                         }      
                         ptr = push_right_go_left (ptr, S);   
                   }           
@@ -647,8 +651,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             if (ptr != NULL && ptr->key == TERM){
                   //Check mark for konkatenace      
                   if (typ == 'S' && ptr->literal != NULL){
-                        mark = ptr->literal;     
-                  }   
+                        help = add_type_before_types (ptr->literal[0], marks);
+                        free(marks);
+                        marks = help;    
+                  }
+                  term = 1;   
                   if (ptr->RPtr != NULL) 
                         SPush (S, ptr->RPtr);
                   if (ptr->LPtr != NULL) 
@@ -659,34 +666,52 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             if (ptr != NULL && ptr->key == CALL){
                   //Call in inicialization static var
                   if (special > 0){
+                        free(types);
+                        free(marks);    
                         DStack(S);
                         return 6;
                   }
-                  error = call_control(ptr, HTable, LHTable, &returns);
+                  error = call_control(ptr, HTable, LHTable, &tvar);
                   if(error != 0){
+                        free(types);
+                        free(marks);
                         DStack (S);
                         return error;
                   }
 
                   //Check return typ of function for S  
                   if (typ == 'S'){
-                        error = string_control(mark, returns);
-                        //if ifj16.print suppresses the error 4
-                        if (special < 0 && error == 4){
-                              error = 0;
+                        if (tvar == 'V'){
+                              free(types);
+                              free(marks);  
+                              DStack (S);
+                              return 8;
                         }
-                        if (error != 0){
-                              DStack(S);
-                              return error;
-                        }                  
-                        if (returns == 'S'){
-                              string_found = 1;
-                        }           
+                        if (tvar == 'I'){
+                              error = subtree_int_to_real(&ptr);
+                              if (error != 0){
+                                    free(types);
+                                    free(marks);  
+                                    DStack (S);
+                                    return error;
+                              }
+                        }      
+                        if (term > 0 && tvar == 'S'){ 
+                              free(types);
+                              free(marks);                                
+                              DStack (S);
+                              return 4;
+                        }
+                        term--;
+                                          
+                        help = add_type_before_types (tvar, types);
+                        free(types);
+                        types = help;                          
                   }
                   else{     
                         //Check return typ of function for other            
-                        if (returns != typ){
-                              if (typ == 'D' && returns == 'I'){
+                        if (tvar != typ){
+                              if (typ == 'D' && tvar == 'I'){
                                     error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                     if (error != 0){
                                           DStack (S);
@@ -696,7 +721,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               else{     
                                     DStack (S);
                                     //Bad type return
-                                    if (returns != 'V'){
+                                    if (tvar != 'V'){
                                           return 4;
                                     }
                                     //Try get return from void
@@ -722,6 +747,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   if (item == NULL){//Try find global
                         error = try_find_global_load_item(ptr, HTable, name);
                         if (error != 0){
+                              free(types);
+                              free(marks);
                               DStack (S);
                               return error;
                         }
@@ -731,6 +758,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               name = add_class_before_name (ActClass, "\0");
                               if (strstr(item->id, name) != NULL){
                                     if (item->index >= special){
+                                          free(types);
+                                          free(marks);
                                           free(name);
                                           DStack(S);
                                           return 6;
@@ -741,6 +770,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   }
                   
                   if ( (item->types)[0] != 'P'){
+                        free(types);
+                        free(marks);
                         DStack (S);
                         return 3;
                   }
@@ -748,18 +779,25 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   tvar = (item->types)[1];
                   //Check type for String
                   if (typ == 'S'){
-                        error = string_control(mark, tvar);
-                        //if ifj16.print suppresses the error 4
-                        if (special < 0 && error == 4){
-                              error = 0;
+                         if (tvar == 'I'){
+                              error = subtree_int_to_real(&ptr);
+                              if (error != 0){
+                                    free(types);
+                                    free(marks);  
+                                    DStack (S);
+                                    return error;
+                              }
+                        } 
+                        if (term > 0 && tvar == 'S'){ 
+                              free(types);
+                              free(marks);                                
+                              DStack (S);
+                              return 4;
                         }
-                        if (error != 0){
-                              DStack(S);
-                              return error;
-                        }     
-                        if (tvar == 'S'){
-                              string_found = 1;
-                        }                        
+                        term--;
+                        help = add_type_before_types (tvar, types);
+                        free(types);
+                        types = help;                               
                   }
                   else{
                         //Check type for other
@@ -785,18 +823,25 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
                   //Check type for String
                   if (typ == 'S'){
-                        error = string_control(mark, tvar);
-                        //if ifj16.print suppresses the error 4
-                        if (special < 0 && error == 4){
-                              error = 0;
+                         if (tvar == 'I'){
+                              error = subtree_int_to_real(&ptr);
+                              if (error != 0){
+                                    free(types);
+                                    free(marks);  
+                                    DStack (S);
+                                    return error;
+                              }
+                        } 
+                        if (term > 0 && tvar == 'S'){ 
+                              free(types);
+                              free(marks);                                
+                              DStack (S);
+                              return 4;
                         }
-                        if (error != 0){
-                              DStack(S);
-                              return error;
-                        }
-                        if (tvar == 'S'){
-                              string_found = 1;
-                        }                             
+                        term--;
+                        help = add_type_before_types (tvar, types);
+                        free(types);
+                        types = help;                             
                   }
                   else{
                         //Check type for other
@@ -817,36 +862,47 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             }
 
       }while (!SEmpty (S));
-
-      if (typ == 'S' && string_found == 0){
-            //argument of type string not found, ifj16.print - 0, other - 4            
-            return (special < 0)? 0 : 4;
+           
+      
+      if (typ == 'S'){
+            error = string_control(types, marks, special);
+            free(types);
+            free(marks);
+            return (error != 0)? error : 0;
       }
       else{
-            //error for ("a" */- 1) only in ifj16.print
-            if (special < 0 && mark != NULL && mark[0] != '+'){
-                  return 4;
-            }
-            else{
-                  return 0;
-            }
-      }            
+            return 0;
+      }
+      
+                
 }
 
-/* helping function for concationation control */
-static inline int string_control(char *mark, char typ){
-      if (mark != NULL){      
-            if (mark[0] != '+')
-                  return 4;                 
-            if (typ == 'V')
-                  return 8;
+
+
+/* string concationation control */
+int string_control(char *types, char *marks, int special){
+      int found_string = 0;
+
+      //find string
+      if(strstr(types, "S") != NULL){
+            found_string = 1;
+      }
+
+      //without marks, ifj16.print - 0, normal param string - 0 or 4
+      if (marks == NULL){
+            if (special < 0){
+                  return 0;
+            }
+            else{
+                  return (found_string)? 0 : 4;            
+            }
       }
       else{
-            if (typ == 'V')
-                  return 8;
-            if (typ != 'S')
-                  return 4;
+            if (special >= 0 && found_string == 0){
+                  return 4;            
+            }      
       }
+      
       return 0;
 }
 
@@ -1185,12 +1241,20 @@ static inline char* add_type_before_types (char typ, char *types){
       size_t size;
       char* new;
       
-      size = strlen(types) + 2;
+      if (types != NULL){
+            size = strlen(types) + 2;
+      }
+      else{
+            size = 2;
+      }
+      
       new = malloc (size);
       if (new != NULL){
             new[0] = typ;
             new[1] = '\0';
-            new = strcat(new, types);
+            if(types != NULL){
+                  new = strcat(new, types);
+            }      
       }
       return new;
 }
@@ -1200,10 +1264,18 @@ static inline char *add_char_behind_types (char *types, char c){
       size_t size;
       char* new;
       
-      size = strlen(types);
+      if (types != NULL){
+            size = strlen(types);
+      }      
+      else{
+            size = 0;      
+      }
+
       new = malloc (size + 2);
       if (new != NULL){
-            new = strcpy(new, types);
+            if (types != NULL){
+                  new = strcpy(new, types);
+            }
             new[size] = c;
             new[size+1] = '\0';                 
       }
