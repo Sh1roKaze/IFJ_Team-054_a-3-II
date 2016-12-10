@@ -795,7 +795,7 @@ int expression(tTNodePtr tree) {
         tree->RPtr = newNode();
         tree->key = TERM;
         tree = tree->RPtr;
-        tree->key = EXPRESSION; 
+        tree->key = TERM; 
         token = getToken();
         if (accept(LEFT_PARENTHESIS)) {
             tree->LPtr = newNode();
