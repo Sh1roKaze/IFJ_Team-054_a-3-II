@@ -37,7 +37,7 @@ static inline char* add_type_before_types (char typ, char *types);
 static inline char *add_char_behind_types (char *types, char c);
 static inline int check_exist_function(IAL_HashTable *HTable, char *name);
 static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
-int string_control(char *types, char *marks, int special);
+int string_control(char *types, int special);
 
 /*build structure for call function int to real, replace int in tree to double*/
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -621,7 +621,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       tStackPtr *S = &stack;
       char *name;
       char tvar; 
-      char *marks = NULL;
       char *types = NULL;
       char *help = NULL;
       int term = 0;
@@ -633,28 +632,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             ptr = STopPop (S);
             //EXPRESSION  
             if (ptr != NULL){
-                  while (ptr->key == EXPRESSION){
-                        //Check mark for konkatenace
-                        if (typ == 'S' && ptr->literal != NULL){
-                              if (ptr->literal[0] == '-'){
-                                    term = 2;
-                              }
-                              help = add_type_before_types (ptr->literal[0], marks);
-                              free(marks);
-                              marks = help;      
-                        }      
+                  while (ptr->key == EXPRESSION){    
                         ptr = push_right_go_left (ptr, S);   
                   }           
              }
                     
             //TERM
             if (ptr != NULL && ptr->key == TERM){
-                  //Check mark for konkatenace      
-                  if (typ == 'S' && ptr->literal != NULL){
-                        help = add_type_before_types (ptr->literal[0], marks);
-                        free(marks);
-                        marks = help;    
-                  }
                   term = 1;   
                   if (ptr->RPtr != NULL) 
                         SPush (S, ptr->RPtr);
@@ -666,15 +650,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
             if (ptr != NULL && ptr->key == CALL){
                   //Call in inicialization static var
                   if (special > 0){
-                        free(types);
-                        free(marks);    
+                        free(types);  
                         DStack(S);
                         return 6;
                   }
                   error = call_control(ptr, HTable, LHTable, &tvar);
                   if(error != 0){
                         free(types);
-                        free(marks);
                         DStack (S);
                         return error;
                   }
@@ -683,7 +665,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   if (typ == 'S'){
                         if (tvar == 'V'){
                               free(types);
-                              free(marks);  
                               DStack (S);
                               return 8;
                         }
@@ -691,14 +672,12 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               error = subtree_int_to_real(&ptr);
                               if (error != 0){
                                     free(types);
-                                    free(marks);  
                                     DStack (S);
                                     return error;
                               }
                         }      
                         if (term > 0 && tvar == 'S'){ 
-                              free(types);
-                              free(marks);                                
+                              free(types);                                
                               DStack (S);
                               return 4;
                         }
@@ -748,7 +727,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         error = try_find_global_load_item(ptr, HTable, name);
                         if (error != 0){
                               free(types);
-                              free(marks);
                               DStack (S);
                               return error;
                         }
@@ -759,7 +737,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               if (strstr(item->id, name) != NULL){
                                     if (item->index >= special){
                                           free(types);
-                                          free(marks);
                                           free(name);
                                           DStack(S);
                                           return 6;
@@ -771,7 +748,6 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   
                   if ( (item->types)[0] != 'P'){
                         free(types);
-                        free(marks);
                         DStack (S);
                         return 3;
                   }
@@ -783,14 +759,12 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               error = subtree_int_to_real(&ptr);
                               if (error != 0){
                                     free(types);
-                                    free(marks);  
                                     DStack (S);
                                     return error;
                               }
                         } 
                         if (term > 0 && tvar == 'S'){ 
-                              free(types);
-                              free(marks);                                
+                              free(types);                               
                               DStack (S);
                               return 4;
                         }
@@ -827,14 +801,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               error = subtree_int_to_real(&ptr);
                               if (error != 0){
                                     free(types);
-                                    free(marks);  
                                     DStack (S);
                                     return error;
                               }
                         } 
+ 
                         if (term > 0 && tvar == 'S'){ 
-                              free(types);
-                              free(marks);                                
+                              free(types);                              
                               DStack (S);
                               return 4;
                         }
@@ -865,9 +838,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
            
       
       if (typ == 'S'){
-            error = string_control(types, marks, special);
+            error = string_control(types, special);
             free(types);
-            free(marks);
             return (error != 0)? error : 0;
       }
       else{
@@ -880,7 +852,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
 
 /* string concationation control */
-int string_control(char *types, char *marks, int special){
+int string_control(char *types, int special){
       int found_string = 0;
 
       //find string
@@ -888,22 +860,11 @@ int string_control(char *types, char *marks, int special){
             found_string = 1;
       }
 
-      //without marks, ifj16.print - 0, normal param string - 0 or 4
-      if (marks == NULL){
-            if (special < 0){
-                  return 0;
-            }
-            else{
-                  return (found_string)? 0 : 4;            
-            }
+      if (special < 0){
+            return 0;
       }
-      else{
-            if (special >= 0 && found_string == 0){
-                  return 4;            
-            }      
-      }
-      
-      return 0;
+
+      return (found_string)? 0 : 4;
 }
 
 /*try find param name global and load global pointer to HT item */
