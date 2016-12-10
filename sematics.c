@@ -37,7 +37,7 @@ static inline char* add_type_before_types (char typ, char *types);
 static inline char *add_char_behind_types (char *types, char c);
 static inline int check_exist_function(IAL_HashTable *HTable, char *name);
 static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
-int string_control(char *types, int special);
+int string_control(tStackPtr *S, char *types, int special);
 
 /*build structure for call function int to real, replace int in tree to double*/
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -619,6 +619,8 @@ int call_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, c
 int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTable, char typ , int special){
       tStackPtr stack;      
       tStackPtr *S = &stack;
+      tStackPtr stack2;      
+      tStackPtr *S2 = &stack2;
       char *name;
       char tvar; 
       char *types = NULL;
@@ -626,6 +628,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       int term = 0;
       
       SInit (S);
+      SInit (S2);
       SPush (S, ptr);
       
       do{
@@ -652,33 +655,30 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   if (special > 0){
                         free(types);  
                         DStack(S);
+                        DStack(S2);
                         return 6;
                   }
                   error = call_control(ptr, HTable, LHTable, &tvar);
                   if(error != 0){
                         free(types);
                         DStack (S);
+                        DStack(S2);
                         return error;
                   }
 
                   //Check return typ of function for S  
                   if (typ == 'S'){
+                        SPush (S2, ptr);
                         if (tvar == 'V'){
                               free(types);
                               DStack (S);
+                              DStack(S2);
                               return 8;
-                        }
-                        if (tvar == 'I'){
-                              error = subtree_int_to_real(&ptr);
-                              if (error != 0){
-                                    free(types);
-                                    DStack (S);
-                                    return error;
-                              }
                         }      
                         if (term > 0 && tvar == 'S'){ 
                               free(types);                                
                               DStack (S);
+                              DStack(S2);
                               return 4;
                         }
                         term--;
@@ -694,11 +694,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                     if (error != 0){
                                           DStack (S);
+                                          DStack(S2);
                                           return error;
                                     }
                               }
                               else{     
                                     DStack (S);
+                                    DStack(S2);
                                     //Bad type return
                                     if (tvar != 'V'){
                                           return 4;
@@ -728,6 +730,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         if (error != 0){
                               free(types);
                               DStack (S);
+                              DStack(S2);
                               return error;
                         }
 
@@ -739,6 +742,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                           free(types);
                                           free(name);
                                           DStack(S);
+                                          DStack(S2);
                                           return 6;
                                     }
                               }
@@ -749,23 +753,18 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   if ( (item->types)[0] != 'P'){
                         free(types);
                         DStack (S);
+                        DStack(S2);
                         return 3;
                   }
                         
                   tvar = (item->types)[1];
                   //Check type for String
                   if (typ == 'S'){
-                         if (tvar == 'I'){
-                              error = subtree_int_to_real(&ptr);
-                              if (error != 0){
-                                    free(types);
-                                    DStack (S);
-                                    return error;
-                              }
-                        } 
+                        SPush (S2, ptr);
                         if (term > 0 && tvar == 'S'){ 
                               free(types);                               
                               DStack (S);
+                              DStack(S2);
                               return 4;
                         }
                         term--;
@@ -780,11 +779,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                     if (error != 0){
                                           DStack (S);
+                                          DStack(S2);
                                           return error;
                                     }
                               }
                               else{
                                     DStack (S);
+                                    DStack(S2);
                                     return 4;
                               }       
                         }
@@ -797,18 +798,11 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
                   //Check type for String
                   if (typ == 'S'){
-                         if (tvar == 'I'){
-                              error = subtree_int_to_real(&ptr);
-                              if (error != 0){
-                                    free(types);
-                                    DStack (S);
-                                    return error;
-                              }
-                        } 
- 
+                         SPush (S2, ptr);
                         if (term > 0 && tvar == 'S'){ 
                               free(types);                              
                               DStack (S);
+                              DStack(S2);
                               return 4;
                         }
                         term--;
@@ -823,11 +817,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                     if (error != 0){
                                           DStack (S);
+                                          DStack(S2);
                                           return error;
                                     }
                               }
                               else{
                                     DStack (S);
+                                    DStack(S2);
                                     return 4;
                               }  
                         }    
@@ -838,11 +834,13 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
            
       
       if (typ == 'S'){
-            error = string_control(types, special);
+            error = string_control(S2, types, special);
+            DStack(S2);
             free(types);
             return (error != 0)? error : 0;
       }
       else{
+            DStack(S2);
             return 0;
       }
       
@@ -852,12 +850,36 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
 
 
 /* string concationation control */
-int string_control(char *types, int special){
+int string_control(tStackPtr *S, char *types, int special){
       int found_string = 0;
+      int found_double = 0;
+      int max = 0;
+      tTNodePtr ptr;
 
       //find string
       if(strstr(types, "S") != NULL){
             found_string = 1;
+      }
+
+      //find double
+      if(strstr(types, "D") != NULL){
+            found_double = 1;
+      }
+
+      while(types[max] != '\0'){
+            max++;
+      }
+
+      if (found_double == 1){
+            for (int i=0; i<max; i++){
+                  ptr = STopPop (S);
+                  if (types[i] == 'I'){
+                        error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                        if (error != 0){
+                              return error;
+                        }      
+                  }
+            }
       }
 
       if (special < 0){
