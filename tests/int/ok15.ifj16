@@ -1,0 +1,10 @@
+class Main
+{
+	static void run()
+	{
+		int i = 10 / 4;
+		double a = 11 / i;
+		double b = a / 2;
+		ifj16.print("i:" + i + " a:" + a + " b:" + b + "\n");
+	}
+}
