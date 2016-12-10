@@ -23,7 +23,11 @@ varTable VTinit(char* c, int type, int size) {
 
 
 tableElemPtr VTsearch(varTable table, char *s) {
-    int pos = hashCode(s, table->size);
+  if (table == NULL) {
+      return NULL;
+  }
+
+  int pos = hashCode(s, table->size);
 
     if ((table->array)[pos] != NULL) {
         tableElemPtr temp = (table->array)[pos];
@@ -63,6 +67,9 @@ int VTinsert(varTable table, char *s, int type, void* value) {
 
 
  void VTdispose(varTable *table) {
+ if (table == NULL || *table == NULL) {
+     return;
+ }
  for (int i = 0; i < (*table)->size; i++) {  
 	 tableElemPtr temp = ((*table)->array)[i];
 	 ((*table)->array)[i] = NULL;
@@ -93,7 +100,11 @@ int VSempty(varStack stack) {
 
 
 varTable VStop(varStack stack) {
-    return (stack->top)->item;
+    if (stack->top != NULL) {
+        return (stack->top)->item;
+    } else {
+        return NULL;
+    }
 }
 
 
@@ -105,14 +116,18 @@ int VSpush(varStack stack, varTable item) {
     stack->top = malloc(sizeof(struct stackElem));
     (stack->top)->item = item;
     (stack->top)->next = temp;
+    return 0;
 }
 
 
 int VSpop(varStack stack) {
     stackElemPtr temp = stack->top;
-    stack->top = temp->next;
-    VTdispose(&(temp->item));
+    if (stack->top != NULL)
+        stack->top = temp->next;
+    if (temp != NULL && temp->item != NULL)
+        VTdispose(&(temp->item));
     free(temp);
+    return 0;
 }
 
 
