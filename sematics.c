@@ -1,12 +1,3 @@
-/*
-Projekt IFJ16
-xverny00 - Jan Verny
-xvalac08 - Dominik Valachovic 
-xosker02 - Jan Oskera
-xvlach16 - Antonin Vlach
-xzikmu08 - David Zikmund
-*/
-
 // sematic.c
 // 22. 11. 2016
 // (c) Jan Oškera
@@ -47,6 +38,7 @@ static inline char *add_char_behind_types (char *types, char c);
 static inline int check_exist_function(IAL_HashTable *HTable, char *name);
 static inline tTNodePtr push_right_go_left (tTNodePtr ptr, tStackPtr *S);
 int string_control(tStackPtr *S, char *types, int special);
+int double_control(tStackPtr *S, char **type);
 
 /*build structure for call function int to real, replace int in tree to double*/
 int subtree_int_to_real(tTNodePtr* ptr){
@@ -630,14 +622,18 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       tStackPtr *S = &stack;
       tStackPtr stack2;      
       tStackPtr *S2 = &stack2;
+      tStackPtr stack3;      
+      tStackPtr *S3 = &stack3;
       char *name;
       char tvar; 
       char *types = NULL;
       char *help = NULL;
       int term = 0;
+      int count = 0;
       
       SInit (S);
       SInit (S2);
+      SInit (S3);
       SPush (S, ptr);
       
       do{
@@ -651,7 +647,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                     
             //TERM
             if (ptr != NULL && ptr->key == TERM){
-                  term = 1;   
+                  term = 1;
+                  if (ptr->literal != NULL){
+                        SPush (S3, ptr);   
+                  }
                   if (ptr->RPtr != NULL) 
                         SPush (S, ptr->RPtr);
                   if (ptr->LPtr != NULL) 
@@ -675,6 +674,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         return error;
                   }
 
+                  help = add_type_before_types (tvar, types);
+                  free(types);
+                  types = help; 
+
                   //Check return typ of function for S  
                   if (typ == 'S'){
                         SPush (S2, ptr);
@@ -689,22 +692,23 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               DStack (S);
                               DStack(S2);
                               return 4;
-                        }
-                        term--;
-                                          
-                        help = add_type_before_types (tvar, types);
-                        free(types);
-                        types = help;                          
+                        }                         
                   }
                   else{     
                         //Check return typ of function for other            
                         if (tvar != typ){
                               if (typ == 'D' && tvar == 'I'){
-                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                                    if (error != 0){
-                                          DStack (S);
-                                          DStack(S2);
-                                          return error;
+                                    if (term == 0 || typ != 'D'){      
+                                          error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                          if (error != 0){
+                                                DStack (S);
+                                                DStack(S2);
+                                                return error;
+                                          }
+                                    }
+                                    else{
+                                          SPush (S3, ptr);    
+                                          count++;  
                                     }
                               }
                               else{     
@@ -720,7 +724,8 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     }
                               }
                         }    
-                  }               
+                  } 
+                  term = 0;              
             }
 
             //ID
@@ -767,6 +772,9 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                   }
                         
                   tvar = (item->types)[1];
+                  help = add_type_before_types (tvar, types);
+                  free(types);
+                  types = help; 
                   //Check type for String
                   if (typ == 'S'){
                         SPush (S2, ptr);
@@ -775,21 +783,23 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               DStack (S);
                               DStack(S2);
                               return 4;
-                        }
-                        term--;
-                        help = add_type_before_types (tvar, types);
-                        free(types);
-                        types = help;                               
+                        }                               
                   }
                   else{
                         //Check type for other
                         if (tvar != typ){
                               if (typ == 'D' && tvar == 'I'){
-                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                                    if (error != 0){
-                                          DStack (S);
-                                          DStack(S2);
-                                          return error;
+                                    if (term == 0 || typ != 'D'){      
+                                          error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                          if (error != 0){
+                                                DStack (S);
+                                                DStack(S2);
+                                                return error;
+                                          }
+                                    }
+                                    else{
+                                          SPush (S3, ptr);    
+                                          count++;  
                                     }
                               }
                               else{
@@ -799,35 +809,41 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               }       
                         }
                   }
+                  term = 0;
             }          
                             
             //LITERAL
             if (ptr != NULL && (ptr->key == STRING || ptr->key == INT || ptr->key == DOUBLE) ){
                   load_type_literal (ptr->key, &tvar);
 
+                  help = add_type_before_types (tvar, types);
+                  free(types);
+                  types = help; 
                   //Check type for String
                   if (typ == 'S'){
-                         SPush (S2, ptr);
+                        SPush (S2, ptr);
                         if (term > 0 && tvar == 'S'){ 
                               free(types);                              
                               DStack (S);
                               DStack(S2);
                               return 4;
-                        }
-                        term--;
-                        help = add_type_before_types (tvar, types);
-                        free(types);
-                        types = help;                             
+                        }                             
                   }
                   else{
                         //Check type for other
                         if (tvar != typ){
                               if (typ == 'D' && tvar == 'I'){
-                                    error = subtree_int_to_real(&ptr); //repleace int to int_to_real
-                                    if (error != 0){
-                                          DStack (S);
-                                          DStack(S2);
-                                          return error;
+                                    if (term == 0 || typ != 'D'){      
+                                          error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+                                          if (error != 0){
+                                                DStack (S);
+                                                DStack(S2);
+                                                return error;
+                                          }
+                                    }
+                                    else{
+                                          SPush (S3, ptr);    
+                                          count++;  
                                     }
                               }
                               else{
@@ -836,8 +852,21 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     return 4;
                               }  
                         }    
-                  }                      
+                  }   
+                  term = 0;                   
             }
+
+      if (count == 2){
+            error = double_control(S3, &types);
+            count = 0;
+            DStack (S3);
+            if (error != 0){
+                  DStack (S);
+                  DStack(S2);
+                  return error;
+            }
+            
+      }
 
       }while (!SEmpty (S));
            
@@ -856,7 +885,38 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                 
 }
 
+/* double term control */
+int double_control(tStackPtr *S, char **type){
+      tTNodePtr ptr = NULL;
+      char *types = *type;
 
+      if (types[0] == 'I' && types[1] == 'I'){
+            ptr = STopPop (S);
+            ptr = STopPop (S);
+            ptr = STopPop (S); 
+            types[0] = 'D';
+            types[1] = 'D';
+            error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+            return (error == 0)? 0 : error;     
+      }
+
+      if (types[0] == 'D' && types[1] == 'I'){
+            ptr = STopPop (S);
+            ptr = STopPop (S);
+            types[1] = 'D';
+            error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+            return (error == 0)? 0 : error;     
+      }
+
+      if (types[0] == 'I' && types[1] == 'D'){
+            ptr = STopPop (S);
+            types[0] = 'D';
+            error = subtree_int_to_real(&ptr); //repleace int to int_to_real
+            return (error == 0)? 0 : error;     
+      }
+
+      return 0;
+}
 
 /* string concationation control */
 int string_control(tStackPtr *S, char *types, int special){
@@ -880,7 +940,7 @@ int string_control(tStackPtr *S, char *types, int special){
       }
 
       if (found_double == 1){
-            for (int i=0; i<max; i++){
+            for (int i=0; i<(max); i++){
                   ptr = STopPop (S);
                   if (types[i] == 'I'){
                         error = subtree_int_to_real(&ptr); //repleace int to int_to_real

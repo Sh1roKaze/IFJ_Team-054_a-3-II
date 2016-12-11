@@ -1,12 +1,3 @@
-/*
-Projekt IFJ16
-xverny00 - Jan Verny
-xvalac08 - Dominik Valachovic 
-xosker02 - Jan Oskera
-xvlach16 - Antonin Vlach
-xzikmu08 - David Zikmund
-*/
-
 #include "interpret.h"
 #include "stack.h"
 #include <math.h>
@@ -317,7 +308,11 @@ rekurzivní vyhodnocení výrazu typu int
      if (root->key == INT) {
          return atoi(root->literal);
      }
-
+/*
+     if (root->key == DOUBLE) {
+         return (int) strtod(root->literal, NULL);
+     } 
+*/
      //najde a vrati hodnotu promenne
      if (root->key == ID) {
          varTable localTable = VStop(tableStack);
@@ -401,6 +396,10 @@ rekurzivní vyhodnocení výrazu typu double
      //literal
      if (root->key == DOUBLE) {
          return strtod(root->literal, NULL);
+     }
+
+     if (root->key == INT) {
+         return (double) atoi(root->literal);
      }
 
      //vraci hodnotu promenne
