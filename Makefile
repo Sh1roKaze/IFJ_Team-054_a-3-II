@@ -24,6 +24,7 @@ ifj16.o : ifj16.c ifj16.h
 	$(CC) -c ifj16.c
 
 ial.o : ial.c ial.h
+	$(CC) -c ial.c
 
 lex_anal.o : lex_anal.c lex_anal.h
 	$(CC) -c lex_anal.c

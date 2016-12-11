@@ -1,3 +1,12 @@
+/*
+Projekt IFJ16
+xverny00 - Jan Verny
+xvalac08 - Dominik Valachovic 
+xosker02 - Jan Oskera
+xvlach16 - Antonin Vlach
+xzikmu08 - David Zikmund
+*/
+
 #include "lex_anal.h"
 
 // global variables
