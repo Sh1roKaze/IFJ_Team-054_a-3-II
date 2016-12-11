@@ -56,10 +56,9 @@
 56: <type> -> double
 57: <id> -> class.id
 58: <id> -> id
-59: <comparison> -> <expression>
-60: <comparison> -> <expression> == <expression>
-61: <comparison> -> <expression> != <expression>
-62: <comparison> -> <expression> < <expression>
-63: <comparison> -> <expression> > <expression>
-64: <comparison> -> <expression> <= <expression>
-65: <comparison> -> <expression> >= <expression>
+59: <comparison> -> <expression> == <expression>
+60: <comparison> -> <expression> != <expression>
+61: <comparison> -> <expression> < <expression>
+62: <comparison> -> <expression> > <expression>
+63: <comparison> -> <expression> <= <expression>
+64: <comparison> -> <expression> >= <expression>
