@@ -1,11 +1,11 @@
 /*
-Projekt IFJ16
-xverny00 - Jan Verny
-xvalac08 - Dominik Valachovic 
-xosker02 - Jan Oskera
-xvlach16 - Antonin Vlach
-xzikmu08 - David Zikmund
-*/
+	Projekt IFJ16
+	xverny00 - Jan Verny
+	xvalac08 - Dominik Valachovic
+	xosker02 - Jan Oskera
+	xvlach16 - Antonin Vlach
+	xzikmu08 - David Zikmund
+	*/
 
 #include "lex_anal.h"
 
@@ -261,7 +261,7 @@ State ignoreBlock() { //printf("[currentState] IGNORE BLOCK: %c\n", currentChara
 State ignoreBlockAsterisk() { //printf("[currentState] IGNORE BLOCK ASTERISK: %c\n", currentCharacter);
   if (currentCharacter == '/')
     currentState = &start;
-  else
+  else if (currentCharacter != '*')
     currentState = &ignoreBlock;
   return;
 }
