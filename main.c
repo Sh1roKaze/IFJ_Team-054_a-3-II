@@ -30,6 +30,7 @@ int main(int argc, char *argv[]){
 
           ret = sematics(derivationTree, &HTable);
           if (ret == 0) {
+              //printTree(derivationTree);
               ret = interpret();
           }
           IAL_htDispose(&HTable); 

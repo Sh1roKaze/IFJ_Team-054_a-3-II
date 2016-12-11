@@ -1,4 +1,5 @@
 #include "interpret.h"
+#include "stack.h"
 #include <math.h>
 
  int interpret(); 
@@ -14,6 +15,9 @@
  int intEvaluate(tTNodePtr root);
  double doubleEvaluate(tTNodePtr root);
  char *stringEvaluate(tTNodePtr root);
+ int printEvaluate(tTNodePtr root, void **output);
+ int term(tTNodePtr root, void **result);
+ int handleNode(tTNodePtr root, void **result);
  int isInternal(char *s);
  void substrHelp(tTNodePtr root, int *a, int *b);
  int executeInternal(char *c, tTNodePtr parameters);
@@ -66,7 +70,7 @@ konec interpretu
 allokace stringu
 */ 
  char *mallocString(char *s) {
-     char* temp = malloc(sizeof(char)*(strlen(s)+1));
+     char* temp = calloc((strlen(s)+1), sizeof(char));
      strcpy(temp, s);
      return temp;
  }
@@ -99,7 +103,7 @@ vlozi interni funkce do globalni tabulky
 
      // veme id a prida k nemu "." a jmeno tridy 
      char *temp = getID((root->LPtr)->RPtr);
-     char *joined = malloc(sizeof(char)*(strlen(s)+strlen(temp)+2));
+     char *joined = calloc((strlen(s)+strlen(temp)+2), sizeof(char));
      strcpy(joined, s);
      joined = strcat(joined, ".");
      joined = strcat(joined, temp);
@@ -127,7 +131,7 @@ vlozi interni funkce do globalni tabulky
 
      // veme id a prida k nemu "." a jmeno tridy
      char *temp = getID((root->LPtr)->RPtr);
-     char *joined = malloc(sizeof(char)*(strlen(s)+strlen(temp)+2));
+     char *joined = calloc((strlen(s)+strlen(temp)+2), sizeof(char));
      strcpy(joined, s);
      joined = strcat(joined, ".");
      joined = strcat(joined, temp);
@@ -181,7 +185,7 @@ vyhledá ve stromu vstupní uzel funkce
  char *f = NULL;
  int i = 0;
  f = strchr(c, 46) + 1;
- s = malloc(sizeof(char)*(strlen(c)-(strlen(f))));
+ s = calloc((strlen(c)-strlen(f)), sizeof(char));
  while (c[i] != '.') {
      s[i] = c[i];
      i++;
@@ -223,7 +227,8 @@ vyhodnotí výraz typu zadaného pomocí "etype"
      }
      int *temp = NULL;
      double *other_temp = NULL;
-     char **strval; 
+     void** strval = NULL;
+     char* retstr = NULL;
      switch (etype) {
          case 1:
          case 4:
@@ -237,7 +242,13 @@ vyhodnotí výraz typu zadaného pomocí "etype"
              return (void*) other_temp;  
          case 3:
          case 6:
-             return (void*) stringEvaluate(root); 
+             strval = malloc(sizeof(void*));
+             printEvaluate(root, strval);
+             retstr = calloc((strlen((char*) *strval)+1), sizeof(char));
+             strcpy(retstr, (char*) *strval);
+             free(*strval);
+             free(strval); 
+             return (void*) retstr; 
      }
 
  }
@@ -305,10 +316,9 @@ rekurzivní vyhodnocení výrazu typu int
          if (temp == NULL) {
              temp = VTsearch(globalTable, root->literal);
          }
-         if (temp != NULL && temp->val == NULL) {
+         if (temp == NULL || temp->val == NULL) {
                  exit(8); 
          }
-
          if (temp != NULL) {
              int value = *((int*) temp->val);
              return value;
@@ -372,7 +382,7 @@ rekurzivní vyhodnocení výrazu typu double
              if (!strcmp(root->literal,"*")) {
                  return temp * other_temp;
              } else {
-                 if (fabs(other_temp) < 10e-7)
+                 if (fabs(other_temp) < 10e-8)
                      exit(9); 
                  return temp / other_temp;
              }
@@ -413,7 +423,7 @@ rekurzivní vyhodnocení výrazu typu double
 
 /*
 rekurzivní vyhodnocení výrazu typu string
-*/ 
+*/
  char *stringEvaluate(tTNodePtr root) {
      char *temp = NULL;
      char* other_temp = NULL;
@@ -432,11 +442,14 @@ rekurzivní vyhodnocení výrazu typu string
              return temp;
          } else {
              if (!strcmp(root->literal,"+")) {
-                 char *sum = malloc(sizeof(char)*(strlen(temp)+strlen(other_temp)+1));
+                 char *sum = calloc((strlen(temp)+strlen(other_temp)+1), sizeof(char));
                  strcpy(sum, temp);
                  sum = strcat(sum, other_temp);
                  return sum;
              } else {
+                 if (!strcmp(root->literal,"-")) {
+                     exit(4);
+                 }
                  return NULL;
              }
          }
@@ -444,7 +457,7 @@ rekurzivní vyhodnocení výrazu typu string
 
      //string literal nebo int literal
      if (root->key == STRING || root->key == INT || root->key == DOUBLE) {
-         temp = malloc(sizeof(char)*(strlen(root->literal)+1));
+         temp = calloc((strlen(root->literal)+1), sizeof(char));
          strcpy(temp, root->literal); 
          return temp;
      }
@@ -463,17 +476,17 @@ rekurzivní vyhodnocení výrazu typu string
              }
 
              if (temp->type == 6) {
-             char *value = malloc(sizeof(char)*(strlen((char*) temp->val)+1));
+             char *value = calloc((strlen((char*) temp->val)+1), sizeof(char));
              strcpy(value, (char*) temp->val);
              return value;
              }
              if (temp->type == 5) {
-                 char *value = malloc(sizeof(char)*18);
+                 char *value = calloc(18, sizeof(char));
                  snprintf(value, 17, "%g", *((double*) temp->val));
                  return value;  
              }
              if (temp->type == 4) {
-                 char *value = malloc(sizeof(char)*18);
+                 char *value = calloc(18, sizeof(char));
                  snprintf(value, 17, "%d", *((int*) temp->val));
                  return value; 
              }
@@ -490,6 +503,252 @@ rekurzivní vyhodnocení výrazu typu string
          }
      }
  }
+
+
+/*
+vyhodnoti vyraz pro print
+*/
+
+int printEvaluate(tTNodePtr root, void **output) {
+ int bString = 0;
+ int retval = 0;
+ int prev = 0; 
+ char *first = NULL;
+ char *second = NULL;
+ char *temp = NULL; 
+ void **fuck = malloc(sizeof(void*));
+ double result = 0;
+
+ tStackPtr *simpleS = malloc(sizeof(struct tStack));
+ SInit(simpleS);
+
+ if (root == NULL) {
+     return 10;
+ }
+
+ while (root->key == EXPRESSION) {
+     SPush(simpleS, root);
+     root = root->LPtr;
+ } 
+
+ if (root->key == TERM) {
+     retval = term(root, fuck);
+ } else {
+     retval = handleNode(root, fuck);
+ }
+
+ if (retval == 6) {
+     first = (char*) *fuck;
+     bString = 1;
+ } else {
+     result = *((double*) *fuck);
+ }
+
+ root = STopPop(simpleS);
+
+ do {      
+      if (root->RPtr != NULL) {
+          if ((root->RPtr)->key == TERM) {
+              retval = term(root->RPtr, fuck);
+              if (retval == 6) {
+                  exit(4);
+              }
+          } else {  
+              retval = printEvaluate(root->RPtr, fuck); 
+          }
+      
+
+      if (retval == 6 && bString == 0) {
+          first = calloc(18, sizeof(char));
+          snprintf(first, 17, "%g", result);
+          bString = 1;
+      }
+  
+      if (bString) {
+          if (root->literal != NULL && (root->literal)[0] == '+') {
+              if (retval == 5) {
+              second = calloc(18, sizeof(char));
+              snprintf(second, 17, "%g", *((double*) *fuck));
+              } else {
+                  second = (char*) *fuck;
+              }
+              temp = calloc((strlen(first)+strlen(second)+1), sizeof(char));
+              strcpy(temp, first);
+              strcat(temp, second);
+              free(first);
+              free(second);
+              first = temp;
+          }
+          if (root->literal != NULL && (root->literal)[0] == '-') {
+              exit(4);
+          }
+      } else {
+          if (root->literal != NULL && (root->literal)[0] == '+') {
+              result = result + *((double*) *fuck);
+          } else {
+              result = result - *((double*) *fuck);
+          }
+      }
+      }
+
+      root = STopPop(simpleS); 
+     
+ } while (!SEmpty(simpleS));
+ 
+ DStack(simpleS);
+ simpleS = NULL;
+
+ if (bString) {
+     *output = (void*) first;
+     return 6;  
+ } else {
+     *((double*) *fuck) = result; 
+     *output = *fuck;
+     return 5; 
+ }
+
+}
+
+
+int term(tTNodePtr root, void **result) {
+ 
+ tStackPtr *simpleS = malloc(sizeof(struct tStack));
+ SInit(simpleS); 
+ double *dTemp = malloc(sizeof(double));
+ void **screw = malloc(sizeof(void*));
+
+ if (root == NULL) {
+     return 10;
+ }
+
+ while (root != NULL) {
+     SPush(simpleS,root);
+     root = root->RPtr;
+ }
+
+ root = STopPop(simpleS);
+
+ if ((root->LPtr)->key == EXPRESSION) {
+     *dTemp = doubleEvaluate(root->LPtr);
+ } else {
+     int ret = handleNode(root->LPtr, screw);
+     if (ret == 6) {
+         exit(4);
+     } else {
+         *dTemp = *((double*) *screw);
+     }
+ }
+
+ root = STopPop(simpleS);
+
+ while (root != NULL) {
+
+     double dHelp = 0; 
+
+     if ((root->LPtr)->key == EXPRESSION) {
+         dHelp = doubleEvaluate(root->LPtr);
+     } else {
+         int ret = handleNode(root->LPtr, screw);
+         if (ret == 6) {
+             exit(4);
+         } else {
+             dHelp = *((double*) *screw);
+         }
+     }
+
+     if ((root->literal)[0] == '*') {
+         *dTemp = *dTemp * dHelp;
+     } else {
+         *dTemp = *dTemp / dHelp;
+     }
+     
+     root = STopPop(simpleS);
+ }
+
+ DStack(simpleS);
+ simpleS = NULL;
+
+ *((double*) *screw) = *dTemp; 
+ *result = *screw;
+
+ return 5;
+
+}
+
+int handleNode(tTNodePtr root, void **result) {
+
+ if (root->key == INT) {
+     *result = malloc(sizeof(double));
+     *((double*) *result) = (double) atoi(root->literal);
+     return 5;
+ }
+
+ if (root->key == DOUBLE) {
+     *result = malloc(sizeof(double));
+     *((double*) *result) = strtod(root->literal, NULL);
+     return 5;
+ }
+
+ if (root->key == STRING) {
+     char* temp = malloc(sizeof(char)*(strlen(root->literal)+1));
+     strcpy(temp, root->literal);
+     *result = (void*) temp;
+     return 6;
+ }
+
+ if (root->key == ID) {
+     varTable localTable = VStop(tableStack);
+     tableElemPtr temp = VTsearch(localTable, root->literal);
+     if (temp == NULL) {
+         temp = VTsearch(globalTable, root->literal);
+     }
+
+     if (temp->val == NULL) {
+         exit(8); 
+     }
+
+     if (temp->type == 6) {
+         *result = (void*) calloc((strlen((char*) temp->val)+1), sizeof(char));
+         strcpy((char*) *result, (char*) temp->val);
+         return 6;    
+     }
+     if (temp->type == 5) {
+         *result = malloc(sizeof(double));
+         *((double*) *result) = *((double*) temp->val);
+         return 5;           
+     }
+     if (temp->type == 4) {
+         *result = (void*) malloc(sizeof(double));
+         *((double*) *result) = (double) *((int*) temp->val);
+         return 5; 
+     }
+          
+ }
+
+ if (root->key == CALL) { 
+     tableElemPtr temp = functionCall(root);
+     if (temp->val == NULL) {
+         exit(8); 
+     }
+
+     if (temp->type == 3) {
+         *result = (char*) temp->val;
+         return 6;    
+     }
+     if (temp->type == 2) {
+         *result = malloc(sizeof(double));  
+         *((double*) *result) = *((double*) temp->val);
+         return 5;            
+     }
+     if (temp->type == 1) {
+         *result = malloc(sizeof(double));
+         *((double*) *result) = (double) *((int*) temp->val);
+         return 5; 
+     } 
+ }
+
+} 
+
 
 /*
 relativně rychlé určení zda je volaná funkce vnitřní nebo ne
@@ -513,16 +772,22 @@ relativně rychlé určení zda je volaná funkce vnitřní nebo ne
 implementace funkce ifj16.print()
 */
  void IFJ16_print(tTNodePtr parameters) {
-     //TODO
-     printf("%s", stringEvaluate(parameters->LPtr));
+     void **temp = malloc(sizeof(void*));
+     int x = printEvaluate(parameters->LPtr, temp);
+     if (x == 6) {
+         printf("%s", (char*) *temp);    
+     }
+     if (x == 5) {
+         printf("%g", *((double*) *temp));
+     }
+     free(*temp);
+     free(temp);
  }
 
 /*
 univerzální funkce pro vykonání vnitřní funkce
 */
  int executeInternal(char *c, tTNodePtr parameters) {
-
-      //TODO
 
      tableElemPtr temp = VTsearch(globalTable, c); 
 
@@ -560,15 +825,23 @@ univerzální funkce pro vykonání vnitřní funkce
      }
      if (!strcmp(c, "ifj16.length")) {
          temp->val = (void*) malloc(sizeof(int));
-         *((int*)(temp->val)) = IFJ16_length(stringEvaluate(parameters->LPtr));
+         void **str = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, str);
+         *((int*)(temp->val)) = IFJ16_length((char*) *str);
+         free(*str);
+         free(str);
          return 0;
      }
      if (!strcmp(c, "ifj16.substr")) {
          int *i = malloc(sizeof(int));
          int *n = malloc(sizeof(int));
          substrHelp(parameters->RPtr, i, n);
-         temp->val = (void*) malloc(sizeof(char)*(strlen(stringEvaluate(parameters->LPtr))+1)); 
-         ret = IFJ16_substr(stringEvaluate(parameters->LPtr), (unsigned) *i, (unsigned) *n, (char*) temp->val);
+         void **str = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, str);
+         temp->val = (void*) malloc(sizeof(char)*(strlen((char*) *str)+1));
+         ret = IFJ16_substr((char*) *str, (unsigned) *i, (unsigned) *n, (char*) temp->val);
+         free(*str);
+         free(str);
          if (ret == 1) {
              exit(8);
          }
@@ -578,25 +851,43 @@ univerzální funkce pro vykonání vnitřní funkce
          return 0;
      }
      if (!strcmp(c, "ifj16.compare")) {
-         char *first = stringEvaluate(parameters->LPtr);
+         void **cmpFirst = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, cmpFirst);
          parameters = parameters->RPtr;
-         char *second = stringEvaluate(parameters->LPtr);
+         void **cmpSecond = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, cmpSecond);
          temp->val = (void*) malloc(sizeof(int));
-         *((int*)(temp->val)) = IFJ16_compare(first, second); 
+
+         *((int*)(temp->val)) = IFJ16_compare((char*) *cmpFirst, (char*) *cmpSecond);
+         
+         free(*cmpFirst);
+         free(cmpFirst);
+         free(*cmpSecond);
+         free(cmpSecond); 
          return 0;
      }
      if (!strcmp(c, "ifj16.find")) {
-         char *first = stringEvaluate(parameters->LPtr);
+         void **cmpFirst = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, cmpFirst);
          parameters = parameters->RPtr;
-         char *second = stringEvaluate(parameters->LPtr); 
+         void **cmpSecond = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, cmpSecond); 
          temp->val = (void*) malloc(sizeof(int));
-         *((int*)(temp->val)) = IFJ16_find(first, second);
+         *((int*)(temp->val)) = IFJ16_find((char*) *cmpFirst, (char*) *cmpSecond);
+         
+         free(*cmpFirst);
+         free(cmpFirst);
+         free(*cmpSecond);
+         free(cmpSecond);
          return 0;
      }
      if (!strcmp(c, "ifj16.sort")) {
-         char *first = stringEvaluate(parameters->LPtr);
-         temp->val = (void*) malloc(sizeof(char)*(strlen(first)+1));
-         ret = IFJ16_sort(first, (char*) temp->val);
+         void **str = malloc(sizeof(void*));
+         printEvaluate(parameters->LPtr, str);
+         temp->val = (void*) malloc(sizeof(char)*(strlen((char*) *str)+1));
+         ret = IFJ16_sort((char*) *str, (char*) temp->val);
+         free(*str);
+         free(str);
          return 0;
      }
      
@@ -878,4 +1169,5 @@ vyhodnoceni porovnani
          return *temp < *other_temp;
      }
  }
+
 

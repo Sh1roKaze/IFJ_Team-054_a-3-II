@@ -3,7 +3,7 @@ CC=gcc -std=c99
 all: ifj16_team54 clean
 
 ifj16_team54 : main.o sematics.o interpret.o stack.o mem_management.o ifj16.o ial.o lex_anal.o parser.o
-	$(CC) main.o sematics.o interpret.o stack.o mem_management.o ifj16.o ial.o lex_anal.o parser.o -o  ifj16_team54
+	$(CC) main.o sematics.o interpret.o stack.o mem_management.o ifj16.o ial.o lex_anal.o parser.o -o ifj16_team54
      
 main.o : main.c
 	$(CC) -c main.c
