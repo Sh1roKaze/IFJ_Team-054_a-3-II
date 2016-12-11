@@ -670,6 +670,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         free(types);  
                         DStack(S);
                         DStack(S2);
+                        DStack(S3);
                         return 6;
                   }
                   error = call_control(ptr, HTable, LHTable, &tvar);
@@ -677,6 +678,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         free(types);
                         DStack (S);
                         DStack(S2);
+                        DStack(S3);
                         return error;
                   }
 
@@ -691,12 +693,14 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               free(types);
                               DStack (S);
                               DStack(S2);
+                              DStack(S3);
                               return 8;
                         }      
                         if (term > 0 && tvar == 'S'){ 
                               free(types);                                
                               DStack (S);
                               DStack(S2);
+                              DStack(S3);
                               return 4;
                         }                         
                   }
@@ -707,8 +711,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     if (term == 0 || typ != 'D'){      
                                           error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                           if (error != 0){
+                                                free(types);
                                                 DStack (S);
                                                 DStack(S2);
+                                                DStack(S3);
                                                 return error;
                                           }
                                     }
@@ -718,8 +724,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     }
                               }
                               else{     
+                                    free(types);
                                     DStack (S);
                                     DStack(S2);
+                                    DStack(S3);
                                     //Bad type return
                                     if (tvar != 'V'){
                                           return 4;
@@ -751,6 +759,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               free(types);
                               DStack (S);
                               DStack(S2);
+                              DStack(S3);
                               return error;
                         }
 
@@ -763,6 +772,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                           free(name);
                                           DStack(S);
                                           DStack(S2);
+                                          DStack(S3);
                                           return 6;
                                     }
                               }
@@ -774,6 +784,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                         free(types);
                         DStack (S);
                         DStack(S2);
+                        DStack(S3);
                         return 3;
                   }
                         
@@ -788,6 +799,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               free(types);                               
                               DStack (S);
                               DStack(S2);
+                              DStack(S3);
                               return 4;
                         }                               
                   }
@@ -798,8 +810,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     if (term == 0 || typ != 'D'){      
                                           error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                           if (error != 0){
+                                                free(types);
                                                 DStack (S);
                                                 DStack(S2);
+                                                DStack(S3);
                                                 return error;
                                           }
                                     }
@@ -809,8 +823,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     }
                               }
                               else{
+                                    free(types);
                                     DStack (S);
                                     DStack(S2);
+                                    DStack(S3);
                                     return 4;
                               }       
                         }
@@ -832,6 +848,7 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                               free(types);                              
                               DStack (S);
                               DStack(S2);
+                              DStack(S3);
                               return 4;
                         }                             
                   }
@@ -842,8 +859,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     if (term == 0 || typ != 'D'){      
                                           error = subtree_int_to_real(&ptr); //repleace int to int_to_real
                                           if (error != 0){
+                                                free(types);
                                                 DStack (S);
                                                 DStack(S2);
+                                                DStack(S3);
                                                 return error;
                                           }
                                     }
@@ -853,8 +872,10 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
                                     }
                               }
                               else{
+                                    free(types);
                                     DStack (S);
                                     DStack(S2);
+                                    DStack(S3);
                                     return 4;
                               }  
                         }    
@@ -880,11 +901,14 @@ int expression_control(tTNodePtr ptr, IAL_HashTable *HTable, IAL_HashTable *LHTa
       if (typ == 'S'){
             error = string_control(S2, types, special);
             DStack(S2);
+            DStack(S3);
             free(types);
             return (error != 0)? error : 0;
       }
       else{
+            free(types);
             DStack(S2);
+            DStack(S3);
             return 0;
       }
       
@@ -1340,4 +1364,3 @@ static inline char *add_char_behind_types (char *types, char c){
 
       return new;
 }
-
