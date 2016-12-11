@@ -1,3 +1,10 @@
+/*
+Projekt IFJ16
+
+xverny00 - Jan Verny
+xzikmu08 - David Zikmund
+*/
+
 #include "interpret.h"
 #include "stack.h"
 #include <math.h>

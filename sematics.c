@@ -1,3 +1,9 @@
+/*
+Projekt IFJ16
+ 
+xosker02 - Jan Oskera
+*/
+
 // sematic.c
 // 22. 11. 2016
 // (c) Jan Oškera
